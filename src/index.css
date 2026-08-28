@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --canvas: #F8F6F3;
+    --canvas-card: #FFFFFF;
+    --canvas-subtle: #F2EFE9;
+    --charcoal: #1A1A1A;
+    --charcoal-muted: #6B6864;
+    --gold: #C8A87C;
+    --gold-dark: #A68758;
+    --gold-light: #F0E8DC;
+    --border-subtle: #E8E4DC;
+    --border-strong: #D4CEBF;
+    --admin-success: #4A7A5E;
+    --admin-warning: #B8863F;
+    --admin-danger: #A5432F;
+    --admin-info: #5B7C99;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--canvas);
+    color: var(--charcoal);
+  }
+
+  h1, h2, h3, .font-editorial {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  .font-mono-data {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom subtle luxury scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F8F6F3;
+}
+::-webkit-scrollbar-thumb {
+  background: #DCD6CA;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C8A87C;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-document, #printable-document * {
+    visibility: visible;
+  }
+  #printable-document {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background: white;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "SUMILUX Admin Panel",
+  "description": "Luxury fashion e-commerce admin panel for managing catalog, atelier editions, orders, VIP customers, marketing, and editorial content.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
