@@ -71,7 +71,7 @@ export const ProductList = () => {
 
   const handleExportCSV = () => {
     if (!products.length) {
-      showToast('info', 'No Data', 'No garments available to export.');
+      showToast('info', 'No Data', 'No products available to export.');
       return;
     }
 
@@ -285,8 +285,8 @@ export const ProductList = () => {
                     )}
                   </button>
                 </th>
-                <th className="py-3.5 px-3 font-semibold">Garment / Piece</th>
-                <th className="py-3.5 px-3 font-semibold">Department</th>
+                <th className="py-3.5 px-3 font-semibold">Product Name</th>
+                <th className="py-3.5 px-3 font-semibold">Category</th>
                 <th
                   className="py-3.5 px-3 font-semibold cursor-pointer hover:text-[#1A1A1A]"
                   onClick={() => handleSort('price')}
@@ -307,7 +307,7 @@ export const ProductList = () => {
                   <td colSpan={7} className="py-16 text-center text-[#A68758]">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Loader2 className="w-6 h-6 animate-spin" />
-                      <span className="text-xs text-[#6B6864]">Loading atelier catalog...</span>
+                      <span className="text-xs text-[#6B6864]">Loading product catalog...</span>
                     </div>
                   </td>
                 </tr>
@@ -317,9 +317,9 @@ export const ProductList = () => {
                     <div className="flex flex-col items-center justify-center space-y-3">
                       <PackageX className="w-10 h-10 text-[#C8A87C]/50" />
                       <div>
-                        <p className="font-semibold text-sm text-[#1A1A1A]">No garments found</p>
+                        <p className="font-semibold text-sm text-[#1A1A1A]">No products found</p>
                         <p className="text-xs text-[#6B6864] mt-0.5">
-                          Try adjusting search filters or create a new atelier piece.
+                          Try adjusting search filters or create a new product.
                         </p>
                       </div>
                       <Link
@@ -434,7 +434,7 @@ export const ProductList = () => {
                           <button
                             onClick={() => deleteProduct(product.id)}
                             className="p-1.5 rounded-lg hover:bg-[#A5432F]/10 text-[#A5432F] transition-colors cursor-pointer"
-                            title="Archive piece (Soft Delete)"
+                            title="Delete Product"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

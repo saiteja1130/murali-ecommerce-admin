@@ -120,7 +120,7 @@ export const CustomerProfile = () => {
               <option value="Client">Standard Client</option>
               <option value="Gold Member">Gold Member</option>
               <option value="Platinum Member">Platinum Member</option>
-              <option value="VIP Patron">VIP Patron</option>
+              <option value="VIP Customer">VIP Customer</option>
             </select>
           </div>
         </div>
@@ -345,7 +345,7 @@ export const CustomerProfile = () => {
             )}
           </div>
 
-          {/* Concierge Notes Card */}
+          {/* Customer Notes Card */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
             <h3 className="font-serif text-base font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-2 flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-[#506040]" />

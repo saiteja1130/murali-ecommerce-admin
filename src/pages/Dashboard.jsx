@@ -81,7 +81,7 @@ export const Dashboard = () => {
               Dashboard
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] uppercase font-mono tracking-widest bg-[#506040]/15 text-[#506040] font-bold">
-              Live Store Active
+              Store is Live
             </span>
           </div>
           <p className="text-xs text-[#687163] mt-1 font-sans">

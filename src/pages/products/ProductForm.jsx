@@ -180,14 +180,14 @@ export const ProductForm = ({ mode }) => {
     const img = images[index];
     const rest = images.filter((_, i) => i !== index);
     setImages([img, ...rest]);
-    showToast('info', 'Primary Cover Updated', 'Main editorial photo updated.');
+    showToast('info', 'Primary Cover Updated', 'Main product photo updated.');
   };
 
   // Submit form via FormData
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !sku.trim()) {
-      showToast('danger', 'Validation Incomplete', 'Garment name and Master SKU are required.');
+      showToast('danger', 'Validation Incomplete', 'Product name and SKU are required.');
       return;
     }
     if (!price || Number(price) <= 0) {
@@ -247,7 +247,7 @@ export const ProductForm = ({ mode }) => {
       <div className="flex flex-col items-center justify-center min-h-[400px] text-[#A68758] space-y-3">
         <Loader2 className="w-8 h-8 animate-spin" />
         <p className="text-xs font-semibold uppercase tracking-wider text-[#6B6864]">
-          Loading garment specifications...
+          Loading product specifications...
         </p>
       </div>
     );

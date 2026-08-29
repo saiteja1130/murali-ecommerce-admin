@@ -45,11 +45,11 @@ export const CustomerList = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `sumilux_patrons_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `sumilux_customers_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('success', 'Patrons Exported', `${filteredCustomers.length} client profiles exported.`);
+    showToast('success', 'Customers Exported', `${filteredCustomers.length} customer profiles exported.`);
   };
   return (<div className="space-y-6">
     {/* Header */}
@@ -137,13 +137,13 @@ export const CustomerList = () => {
                 <td colSpan={7} className="py-12 text-center">
                   <div className="flex flex-col items-center justify-center text-[#A68758]">
                     <Loader2 className="w-6 h-6 animate-spin mb-2" />
-                    <p>Loading patron directory...</p>
+                    <p>Loading customer directory...</p>
                   </div>
                 </td>
               </tr>
             ) : customers.length === 0 ? (<tr>
               <td colSpan={7} className="py-12 text-center text-[#6B6864]">
-                No client profiles found matching criteria.
+                No customer profiles found matching criteria.
               </td>
             </tr>) : (customers.map((cust) => (<tr key={cust.id} className="hover:bg-[#FAF8F5] transition-colors cursor-pointer" onClick={() => navigate(`/admin/customers/${cust.id}`)}>
               <td className="py-3.5 px-4">

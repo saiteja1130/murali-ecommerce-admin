@@ -93,14 +93,14 @@ export const OrderList = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="font-serif text-3xl font-bold text-[#1A1A1A]">
-              Client Orders & Dispatch
+              Orders
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] uppercase font-mono tracking-widest bg-[#C8A87C]/15 text-[#A68758] font-bold">
               {orders.length} Active Orders
             </span>
           </div>
           <p className="text-xs text-[#6B6864] mt-1">
-            White-glove order fulfillment, tracking numbers, packing slip generation, and returns.
+            Manage orders, tracking, packing slips, and returns.
           </p>
         </div>
 
@@ -195,7 +195,7 @@ export const OrderList = () => {
                     <td className="py-3.5 px-4 font-mono font-bold text-[#1A1A1A]">
                       {order.orderNumber}
                       {order.isAtelierOrder && (<span className="block text-[9px] text-[#A68758] font-editorial italic">
-                          * Haute Couture Edition
+                          * Special Edition
                         </span>)}
                     </td>
                     <td className="py-3.5 px-3 text-[#6B6864] whitespace-nowrap">

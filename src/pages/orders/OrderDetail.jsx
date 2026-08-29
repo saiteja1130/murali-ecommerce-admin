@@ -116,7 +116,7 @@ export const OrderDetail = () => {
         </div>
       </div>
 
-      {/* Fulfillment Stepper & Quick Status Selector Card */}
+      {/* Order Progress Stepper */}
       <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E8E4DC] pb-4">
           <div>
@@ -260,13 +260,13 @@ export const OrderDetail = () => {
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
             <h2 className="font-serif text-lg font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-3 flex items-center gap-2">
               <Truck className="w-4 h-4 text-[#506040]" />
-              <span>Delivery & Courier Information</span>
+              <span>Shipping Information</span>
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1">
-                  Courier Partner
+                  Shipping Provider
                 </label>
                 <input
                   type="text"

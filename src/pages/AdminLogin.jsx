@@ -123,10 +123,10 @@ export const AdminLogin = () => {
               className="w-full py-3 px-4 bg-[#1A1A1A] hover:bg-[#333333] text-white text-xs font-semibold rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer mt-2"
             >
               {loading ? (
-                <span>Authenticating with Atelier Vault...</span>
+                <span>Authenticating...</span>
               ) : (
                 <>
-                  <span>Access Admin Suite</span>
+                  <span>Login</span>
                   <ArrowRight className="w-3.5 h-3.5 text-[#C8A87C]" />
                 </>
               )}
@@ -135,7 +135,7 @@ export const AdminLogin = () => {
         </div>
 
         <div className="text-center mt-6 text-xs text-[#6B6864]">
-          Protected by SUMILUX Internal Key Management & TLS 1.3
+          Protected by Secure Encryption
         </div>
       </div>
 
@@ -144,10 +144,10 @@ export const AdminLogin = () => {
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white max-w-sm w-full p-6 rounded-2xl border border-[#E8E4DC] shadow-2xl space-y-4">
             <h3 className="font-serif text-lg font-bold text-[#1A1A1A]">
-              Passcode Reset Request
+              Password Reset
             </h3>
             <p className="text-xs text-[#6B6864] leading-relaxed">
-              For security compliance, admin credentials must be reset through your Head of Atelier or by contacting IT Security at <span className="font-mono text-[#1A1A1A]">security@sumilux.com</span>.
+              For security reasons, admin passwords must be reset by contacting IT Support at <span className="font-mono text-[#1A1A1A]">security@sumilux.com</span>.
             </p>
             <div className="flex justify-end pt-2">
               <button
