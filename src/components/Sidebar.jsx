@@ -22,21 +22,21 @@ export const Sidebar = () => {
 
   const navSections = [
     {
-      title: 'EXECUTIVE',
+      title: 'OVERVIEW',
       items: [
         { name: 'Dashboard', path: '/admin', icon: LayoutDashboard }
       ]
     },
     {
-      title: 'CATALOG & ATELIER',
+      title: 'PRODUCTS & INVENTORY',
       items: [
         {
-          name: 'Product Catalog',
+          name: 'All Products',
           path: '/admin/products',
           icon: Package
         },
         {
-          name: 'New Product',
+          name: 'Add New Product',
           path: '/admin/products/new',
           icon: PlusCircle
         },
@@ -48,28 +48,28 @@ export const Sidebar = () => {
       ]
     },
     {
-      title: 'COMMERCE & SETTLEMENT',
+      title: 'ORDERS & USERS',
       items: [
         {
-          name: 'Orders & Dispatch',
+          name: 'Orders',
           path: '/admin/orders',
           icon: ShoppingBag,
           badge: pendingOrdersCount > 0 ? pendingOrdersCount : undefined
         },
         {
-          name: 'Payment Histories',
+          name: 'Payment History',
           path: '/admin/payments',
           icon: CreditCard
         },
         {
-          name: 'Users / Patrons',
+          name: 'Customers',
           path: '/admin/customers',
           icon: Users
         }
       ]
     },
     {
-      title: 'STUDIO & CMS',
+      title: 'WEBSITE BANNERS',
       items: [
         {
           name: 'Hero Carousel',
@@ -87,30 +87,37 @@ export const Sidebar = () => {
       }`}
     >
       {/* Brand Header */}
-      <div className="h-18 px-5 border-b border-[#E8E4DC] flex items-center justify-between shrink-0">
+      <div className="h-20 px-4 border-b border-[#E8E4DC] flex items-center justify-between shrink-0">
         {!isSidebarCollapsed ? (
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] flex items-center justify-center text-[#C8A87C] font-serif font-bold text-lg tracking-wider shadow-sm">
-              S
-            </div>
-            <div>
-              <div className="font-serif text-xl tracking-[0.2em] font-semibold text-[#1A1A1A] leading-none">
-                SUMILUX
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img
+              src="/assets/images/Logo.png"
+              alt="Murari's Glam & Glow"
+              className="h-11 w-auto object-contain shrink-0"
+            />
+            <div className="min-w-0">
+              <div className="font-serif text-lg tracking-[0.12em] font-bold text-[#1D241C] leading-tight truncate">
+                MURARI'S
               </div>
-              <div className="text-[9px] uppercase tracking-[0.25em] text-[#C8A87C] font-medium mt-1">
-                Atelier Administration
+              <div className="text-[8.5px] uppercase tracking-[0.2em] text-[#C69E58] font-semibold truncate">
+                GLAM & GLOW • ADMIN
               </div>
             </div>
           </div>
         ) : (
-          <div className="mx-auto w-9 h-9 rounded-lg bg-[#1A1A1A] flex items-center justify-center text-[#C8A87C] font-serif font-bold text-lg">
-            S
+          <div className="mx-auto flex items-center justify-center">
+            <img
+              src="/assets/images/Logo.png"
+              alt="Murari's Glam & Glow"
+              className="h-9 w-auto object-contain"
+              title="Murari's Glam & Glow"
+            />
           </div>
         )}
 
         <button
           onClick={toggleSidebar}
-          className="p-1.5 rounded-lg text-[#6B6864] hover:text-[#1A1A1A] hover:bg-[#F2EFE9] transition-colors cursor-pointer"
+          className="p-1.5 rounded-lg text-[#687163] hover:text-[#1D241C] hover:bg-[#F3F0E9] transition-colors cursor-pointer shrink-0"
           title={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           aria-label="Toggle sidebar width"
         >
@@ -124,7 +131,7 @@ export const Sidebar = () => {
           return (
             <div key={idx} className="space-y-1">
               {!isSidebarCollapsed && (
-                <div className="px-3 text-[10px] font-semibold tracking-[0.18em] text-[#A68758] uppercase mb-1.5 font-sans">
+                <div className="px-3 text-[10px] font-semibold tracking-[0.18em] text-[#506040] uppercase mb-1.5 font-sans">
                   {section.title}
                 </div>
               )}
@@ -138,8 +145,8 @@ export const Sidebar = () => {
                     className={({ isActive }) =>
                       `group relative flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 ${
                         isActive
-                          ? 'bg-[#1A1A1A] text-[#F8F6F3] shadow-sm'
-                          : 'text-[#6B6864] hover:text-[#1A1A1A] hover:bg-[#F2EFE9]'
+                          ? 'bg-[#1D241C] text-[#FAF8F5] shadow-sm'
+                          : 'text-[#687163] hover:text-[#1D241C] hover:bg-[#F3F0E9]'
                       } ${isSidebarCollapsed ? 'justify-center px-2' : ''}`
                     }
                     title={isSidebarCollapsed ? item.name : undefined}
@@ -148,21 +155,21 @@ export const Sidebar = () => {
                       <>
                         <Icon
                           className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-105 ${
-                            isActive ? 'text-[#C8A87C]' : 'text-[#6B6864] group-hover:text-[#1A1A1A]'
+                            isActive ? 'text-[#C69E58]' : 'text-[#687163] group-hover:text-[#1D241C]'
                           }`}
                         />
                         {!isSidebarCollapsed && <span className="truncate flex-1 tracking-wide">{item.name}</span>}
                         {!isSidebarCollapsed && item.badge && (
                           <span
                             className={`px-1.5 py-0.5 text-[10px] font-mono rounded-md font-semibold tracking-tight ${
-                              isActive ? 'bg-[#C8A87C] text-[#1A1A1A]' : 'bg-[#C8A87C]/20 text-[#A68758]'
+                              isActive ? 'bg-[#C69E58] text-[#1D241C]' : 'bg-[#C69E58]/20 text-[#A87C38]'
                             }`}
                           >
                             {item.badge}
                           </span>
                         )}
                         {isSidebarCollapsed && item.badge && (
-                          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#C8A87C]" />
+                          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#C69E58]" />
                         )}
                       </>
                     )}

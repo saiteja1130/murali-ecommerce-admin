@@ -2,14 +2,17 @@
 
 @layer base {
   :root {
-    --canvas: #F8F6F3;
+    --canvas: #FAF8F5;
     --canvas-card: #FFFFFF;
-    --canvas-subtle: #F2EFE9;
-    --charcoal: #1A1A1A;
-    --charcoal-muted: #6B6864;
-    --gold: #C8A87C;
-    --gold-dark: #A68758;
-    --gold-light: #F0E8DC;
+    --canvas-subtle: #F3F0E9;
+    --charcoal: #1D241C;
+    --charcoal-muted: #687163;
+    --gold: #C69E58;
+    --gold-dark: #A87C38;
+    --gold-light: #F3E6D0;
+    --botanical: #506040;
+    --botanical-dark: #38452D;
+    --botanical-light: #E5ECE0;
     --border-subtle: #E8E4DC;
     --border-strong: #D4CEBF;
     --admin-success: #4A7A5E;
@@ -40,14 +43,14 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F8F6F3;
+  background: #FAF8F5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #DCD6CA;
+  background: #D4CEBF;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #C8A87C;
+  background: #C69E58;
 }
 
 @media print {

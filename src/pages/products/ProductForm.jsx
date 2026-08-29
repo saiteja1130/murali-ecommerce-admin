@@ -266,12 +266,12 @@ export const ProductForm = ({ mode }) => {
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
-                {mode === 'edit' ? `Edit "${name || 'Garment'}"` : 'Author New Atelier Creation'}
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#1D241C]">
+                {mode === 'edit' ? `Edit "${name || 'Product'}"` : 'Add New Product'}
               </h1>
             </div>
-            <p className="text-xs text-[#6B6864] mt-0.5">
-              Specify fabric origins, color swatches, stock availability, and editorial gallery.
+            <p className="text-xs text-[#687163] mt-0.5">
+              Enter product name, pricing, photos, category, and stock quantity.
             </p>
           </div>
         </div>
@@ -279,21 +279,21 @@ export const ProductForm = ({ mode }) => {
         <div className="flex items-center gap-3">
           <Link
             to="/admin/products"
-            className="px-4 py-2 bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-semibold text-[#6B6864] transition-colors"
+            className="px-4 py-2 bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-semibold text-[#687163] transition-colors"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-5 py-2 bg-[#1A1A1A] hover:bg-[#333333] disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
+            className="px-5 py-2 bg-[#1D241C] hover:bg-[#C69E58] hover:text-[#1D241C] disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
           >
             {isSubmitting ? (
-              <Loader2 className="w-4 h-4 animate-spin text-[#C8A87C]" />
+              <Loader2 className="w-4 h-4 animate-spin text-[#C69E58]" />
             ) : (
-              <Save className="w-4 h-4 text-[#C8A87C]" />
+              <Save className="w-4 h-4 text-[#C69E58]" />
             )}
-            <span>{mode === 'edit' ? 'Save Changes' : 'Publish Garment'}</span>
+            <span>{mode === 'edit' ? 'Save Changes' : 'Save Product'}</span>
           </button>
         </div>
       </div>
@@ -304,64 +304,64 @@ export const ProductForm = ({ mode }) => {
         <div className="lg:col-span-2 space-y-6">
           {/* General Information Card */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
-            <h2 className="font-serif text-lg font-bold text-[#1A1A1A] border-b border-[#F2EFE9] pb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#C8A87C]" />
-              <span>Garment Identification</span>
+            <h2 className="font-serif text-lg font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-3 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#C69E58]" />
+              <span>Product Information</span>
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1.5">
-                  Garment Name *
+                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1.5">
+                  Product Name *
                 </label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="e.g. The Aurelia Hand-Woven Silk Trench"
-                  className="w-full px-3.5 py-2.5 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] font-semibold focus:outline-none focus:border-[#C8A87C] focus:bg-white"
+                  placeholder="e.g. Elegant Hair Clip"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] font-semibold focus:outline-none focus:border-[#C69E58] focus:bg-white"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1.5">
-                    Master SKU *
+                  <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1.5">
+                    Product SKU *
                   </label>
                   <input
                     type="text"
                     required
                     value={sku}
                     onChange={(e) => setSku(e.target.value)}
-                    placeholder="SMI-TRN-001"
-                    className="w-full px-3.5 py-2.5 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs font-mono text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]"
+                    placeholder="SMI-CLP-001"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-mono text-[#1D241C] focus:outline-none focus:border-[#C69E58]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1.5">
                     URL Slug
                   </label>
                   <input
                     type="text"
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
-                    placeholder="aurelia-silk-trench"
-                    className="w-full px-3.5 py-2.5 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs font-mono text-[#6B6864] focus:outline-none focus:border-[#C8A87C]"
+                    placeholder="elegant-hair-clip"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-mono text-[#687163] focus:outline-none focus:border-[#C69E58]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1.5">
-                  Editorial Description & Drapery Notes
+                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1.5">
+                  Product Description
                 </label>
                 <textarea
                   rows={4}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe the fabric weave, drape, bespoke buttons, and silhouette styling..."
-                  className="w-full px-3.5 py-2.5 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C] focus:bg-white leading-relaxed font-sans"
+                  placeholder="Describe the product material, design, comfort, and usage..."
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] focus:bg-white leading-relaxed font-sans"
                 />
               </div>
             </div>
@@ -369,12 +369,12 @@ export const ProductForm = ({ mode }) => {
 
           {/* Media & Multi-Image Gallery Card */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between border-b border-[#F2EFE9] pb-3">
-              <h2 className="font-serif text-lg font-bold text-[#1A1A1A] flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-[#C8A87C]" />
-                <span>Editorial Imagery & Runway Looks</span>
+            <div className="flex items-center justify-between border-b border-[#E8E4DC] pb-3">
+              <h2 className="font-serif text-lg font-bold text-[#1D241C] flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-[#C69E58]" />
+                <span>Product Photos</span>
               </h2>
-              <span className="text-xs text-[#6B6864]">First photo acts as primary cover</span>
+              <span className="text-xs text-[#687163]">First photo will be the main image</span>
             </div>
 
             {/* Existing & newly selected images grid */}
@@ -454,22 +454,22 @@ export const ProductForm = ({ mode }) => {
 
           {/* Color & Size Variant Matrix */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between border-b border-[#F2EFE9] pb-3">
+            <div className="flex items-center justify-between border-b border-[#E8E4DC] pb-3">
               <div>
-                <h2 className="font-serif text-lg font-bold text-[#1A1A1A] flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-[#C8A87C]" />
-                  <span>Variant Matrix (Colors & Sizes)</span>
+                <h2 className="font-serif text-lg font-bold text-[#1D241C] flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-[#C69E58]" />
+                  <span>Product Variants (Colors & Sizes)</span>
                 </h2>
-                <p className="text-xs text-[#6B6864] mt-0.5">
-                  Allocate inventory and pricing per bespoke colorway and size scale.
+                <p className="text-xs text-[#687163] mt-0.5">
+                  Optional: Add colors, sizes, and stock per variant.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleAddVariant}
-                className="px-3 py-1.5 bg-[#FAF8F5] hover:bg-[#F2EFE9] border border-[#E8E4DC] text-[#1A1A1A] text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 bg-[#FAF8F5] hover:bg-[#F2EFE9] border border-[#E8E4DC] text-[#1D241C] text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5 text-[#C8A87C]" />
+                <Plus className="w-3.5 h-3.5 text-[#C69E58]" />
                 <span>Add Variant</span>
               </button>
             </div>
@@ -477,17 +477,17 @@ export const ProductForm = ({ mode }) => {
             <div className="space-y-3">
               {variants.length === 0 ? (
                 <div className="p-6 text-center border-2 border-dashed border-[#E8E4DC] rounded-xl bg-[#FAF8F5]/50">
-                  <Layers className="w-8 h-8 text-[#A68758]/50 mx-auto mb-2" />
-                  <p className="text-xs font-semibold text-[#1A1A1A]">No variants created yet</p>
-                  <p className="text-[11px] text-[#6B6864] mt-0.5 mb-3">
-                    Optional: Add bespoke colorways, sizing scales, and stock per SKU.
+                  <Layers className="w-8 h-8 text-[#506040]/50 mx-auto mb-2" />
+                  <p className="text-xs font-semibold text-[#1D241C]">No variants added yet</p>
+                  <p className="text-[11px] text-[#687163] mt-0.5 mb-3">
+                    If your item has multiple colors or sizes, you can add them here.
                   </p>
                   <button
                     type="button"
                     onClick={handleAddVariant}
-                    className="px-3.5 py-1.5 bg-[#1A1A1A] hover:bg-[#333333] text-white text-xs font-semibold rounded-xl transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 bg-[#1D241C] hover:bg-[#C69E58] text-white hover:text-[#1D241C] text-xs font-semibold rounded-xl transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Plus className="w-3.5 h-3.5 text-[#C8A87C]" />
+                    <Plus className="w-3.5 h-3.5" />
                     <span>Add First Variant</span>
                   </button>
                 </div>
@@ -499,44 +499,44 @@ export const ProductForm = ({ mode }) => {
                   >
                     <div
                       className="w-6 h-6 rounded-full border border-black/10 shrink-0"
-                      style={{ backgroundColor: v.colorHex || '#1A1A1A' }}
+                      style={{ backgroundColor: v.colorHex || '#1D241C' }}
                     />
 
                     <div className="flex-1 min-w-[120px]">
-                      <label className="text-[10px] uppercase font-mono text-[#6B6864]">Colorway</label>
+                      <label className="text-[10px] uppercase font-mono text-[#687163]">Color Name</label>
                       <input
                         type="text"
                         value={v.color}
-                        placeholder="e.g. Noir Eclipse"
+                        placeholder="e.g. Gold / Black"
                         onChange={(e) => handleUpdateVariant(idx, { color: e.target.value })}
                         className="w-full bg-white px-2 py-1 rounded border border-[#E8E4DC] text-xs font-medium"
                       />
                     </div>
 
                     <div className="w-24">
-                      <label className="text-[10px] uppercase font-mono text-[#6B6864]">Hex Color</label>
+                      <label className="text-[10px] uppercase font-mono text-[#687163]">Color Hex</label>
                       <input
                         type="text"
                         value={v.colorHex}
-                        placeholder="#1A1A1A"
+                        placeholder="#1D241C"
                         onChange={(e) => handleUpdateVariant(idx, { colorHex: e.target.value })}
                         className="w-full bg-white px-2 py-1 rounded border border-[#E8E4DC] text-xs font-mono"
                       />
                     </div>
 
                     <div className="w-24">
-                      <label className="text-[10px] uppercase font-mono text-[#6B6864]">Size</label>
+                      <label className="text-[10px] uppercase font-mono text-[#687163]">Size</label>
                       <input
                         type="text"
                         value={v.size}
-                        placeholder="e.g. 38 FR"
+                        placeholder="e.g. Medium"
                         onChange={(e) => handleUpdateVariant(idx, { size: e.target.value })}
                         className="w-full bg-white px-2 py-1 rounded border border-[#E8E4DC] text-xs"
                       />
                     </div>
 
                     <div className="w-20">
-                      <label className="text-[10px] uppercase font-mono text-[#6B6864]">Stock</label>
+                      <label className="text-[10px] uppercase font-mono text-[#687163]">Stock</label>
                       <input
                         type="number"
                         min={0}
@@ -547,7 +547,7 @@ export const ProductForm = ({ mode }) => {
                     </div>
 
                     <div className="w-24">
-                      <label className="text-[10px] uppercase font-mono text-[#6B6864]">Price (₹)</label>
+                      <label className="text-[10px] uppercase font-mono text-[#687163]">Price (₹)</label>
                       <input
                         type="number"
                         min={0}
@@ -560,7 +560,7 @@ export const ProductForm = ({ mode }) => {
                     <button
                       type="button"
                       onClick={() => handleRemoveVariant(idx)}
-                      className="p-1.5 text-[#6B6864] hover:text-[#A5432F] hover:bg-[#A5432F]/10 rounded mt-3.5 cursor-pointer"
+                      className="p-1.5 text-[#687163] hover:text-red-700 hover:bg-red-50 rounded mt-3.5 cursor-pointer"
                       title="Remove variant"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -571,66 +571,66 @@ export const ProductForm = ({ mode }) => {
             </div>
           </div>
 
-          {/* Optional Sourcing, Care & Dimensions Card */}
+          {/* Optional Material & Details Card */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
-            <h2 className="font-serif text-lg font-bold text-[#1A1A1A] border-b border-[#F2EFE9] pb-3 flex items-center justify-between">
+            <h2 className="font-serif text-lg font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#C8A87C]" />
-                <span>Materiality & Dimensions (Optional)</span>
+                <ShieldCheck className="w-4 h-4 text-[#C69E58]" />
+                <span>Material & Details (Optional)</span>
               </div>
-              <span className="text-[11px] font-mono text-[#A68758] uppercase">Optional Details</span>
+              <span className="text-[11px] font-mono text-[#506040] uppercase">Optional</span>
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1.5">
-                  Composition & Weave
+                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1.5">
+                  Material / Fabric
                 </label>
                 <input
                   type="text"
                   value={composition}
                   onChange={(e) => setComposition(e.target.value)}
-                  placeholder="e.g. 100% Lyon Silk Twill with Cupro lining"
-                  className="w-full px-3.5 py-2.5 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]"
+                  placeholder="e.g. 100% Premium Cotton / Metal Alloy"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1.5">
-                  Traceability & Sustainable Craftsmanship
+                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1.5">
+                  Quality & Highlights
                 </label>
                 <input
                   type="text"
                   value={sustainability}
                   onChange={(e) => setSustainability(e.target.value)}
-                  placeholder="e.g. Organic certified silk, zero wastewater botanical pigments"
-                  className="w-full px-3.5 py-2.5 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]"
+                  placeholder="e.g. Eco-Friendly, Rust-Proof, Lightweight"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58]"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1.5">
                     Care Instructions
                   </label>
                   <textarea
                     rows={2}
                     value={careInstructions}
                     onChange={(e) => setCareInstructions(e.target.value)}
-                    placeholder="Dry clean only..."
-                    className="w-full px-3.5 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]"
+                    placeholder="e.g. Keep away from water and direct perfume spray..."
+                    className="w-full px-3.5 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1.5">
-                    Silhouette & Model Dimensions
+                  <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1.5">
+                    Size & Dimensions
                   </label>
                   <textarea
                     rows={2}
                     value={dimensions}
                     onChange={(e) => setDimensions(e.target.value)}
-                    placeholder="Length 124cm, Model 178cm wearing size 36..."
-                    className="w-full px-3.5 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]"
+                    placeholder="e.g. Length: 8cm, Width: 4cm..."
+                    className="w-full px-3.5 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58]"
                   />
                 </div>
               </div>
@@ -642,13 +642,13 @@ export const ProductForm = ({ mode }) => {
         <div className="space-y-6">
           {/* Stock Availability Card */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between border-b border-[#F2EFE9] pb-3">
+            <div className="flex items-center justify-between border-b border-[#E8E4DC] pb-3">
               <div>
-                <h3 className="font-serif text-base font-bold text-[#1A1A1A]">
+                <h3 className="font-serif text-base font-bold text-[#1D241C]">
                   Stock Availability
                 </h3>
-                <p className="text-[11px] text-[#6B6864] mt-0.5">
-                  Storefront purchase availability
+                <p className="text-[11px] text-[#687163] mt-0.5">
+                  Enable or disable purchasing
                 </p>
               </div>
 
@@ -657,7 +657,7 @@ export const ProductForm = ({ mode }) => {
                 type="button"
                 onClick={() => setIsStockAvailable(!isStockAvailable)}
                 className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  isStockAvailable ? 'bg-[#4A7A5E]' : 'bg-[#D1CDC7]'
+                  isStockAvailable ? 'bg-[#506040]' : 'bg-[#D1CDC7]'
                 }`}
                 role="switch"
                 aria-checked={isStockAvailable}
@@ -673,36 +673,36 @@ export const ProductForm = ({ mode }) => {
             <div
               className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${
                 isStockAvailable
-                  ? 'bg-[#4A7A5E]/10 text-[#4A7A5E] border border-[#4A7A5E]/20'
-                  : 'bg-[#A5432F]/10 text-[#A5432F] border border-[#A5432F]/20'
+                  ? 'bg-[#506040]/10 text-[#506040] border border-[#506040]/20'
+                  : 'bg-red-50 text-red-700 border border-red-200'
               }`}
             >
               {isStockAvailable ? (
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-[#4A7A5E]" />
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-[#506040]" />
               ) : (
-                <XCircle className="w-4 h-4 shrink-0 text-[#A5432F]" />
+                <XCircle className="w-4 h-4 shrink-0 text-red-700" />
               )}
               <span>
                 {isStockAvailable
-                  ? 'Stock Available (Purchasing Enabled)'
+                  ? 'In Stock (Available for Purchase)'
                   : 'Out of Stock (Disabled on Storefront)'}
               </span>
             </div>
-            <p className="text-[11px] text-[#6B6864] leading-relaxed">
-              When disabled, clients on the storefront will see this garment with an "Out of Stock" status and cannot add it to their bag.
+            <p className="text-[11px] text-[#687163] leading-relaxed">
+              When disabled, customers will see this item as "Out of Stock" and won't be able to buy it.
             </p>
           </div>
 
           {/* Pricing Card */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
-            <h3 className="font-serif text-base font-bold text-[#1A1A1A] border-b border-[#F2EFE9] pb-2">
-              Luxury Valuation & Pricing
+            <h3 className="font-serif text-base font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-2">
+              Pricing (₹ INR)
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1">
-                  Retail Price (₹ INR) *
+                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1">
+                  Selling Price (₹) *
                 </label>
                 <input
                   type="number"
@@ -711,12 +711,12 @@ export const ProductForm = ({ mode }) => {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-3.5 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs font-mono font-bold text-[#1A1A1A]"
+                  className="w-full px-3.5 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-mono font-bold text-[#1D241C]"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1">
-                  Original Price (₹ INR)
+                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1">
+                  Original / MRP Price (₹)
                 </label>
                 <input
                   type="number"
@@ -724,7 +724,7 @@ export const ProductForm = ({ mode }) => {
                   value={originalPrice}
                   onChange={(e) => setOriginalPrice(e.target.value)}
                   placeholder="Optional original price"
-                  className="w-full px-3.5 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs font-mono text-[#6B6864]"
+                  className="w-full px-3.5 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-mono text-[#687163]"
                 />
               </div>
             </div>
@@ -732,20 +732,20 @@ export const ProductForm = ({ mode }) => {
 
           {/* Dynamic Category Card */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
-            <h3 className="font-serif text-base font-bold text-[#1A1A1A] border-b border-[#F2EFE9] pb-2">
-              Classification
+            <h3 className="font-serif text-base font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-2">
+              Category
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider mb-1">
-                  Primary Department *
+                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1">
+                  Product Category *
                 </label>
                 {categories.length === 0 ? (
-                  <div className="p-3 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#6B6864]">
+                  <div className="p-3 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#687163]">
                     No categories found. Please create one in the{' '}
-                    <Link to="/admin/categories" className="text-[#C8A87C] font-semibold underline">
-                      Categories Manager
+                    <Link to="/admin/categories" className="text-[#C69E58] font-semibold underline">
+                      Category Manager
                     </Link>
                     .
                   </div>
@@ -754,10 +754,10 @@ export const ProductForm = ({ mode }) => {
                     required
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C] cursor-pointer"
+                    className="w-full px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
                   >
                     <option value="" disabled>
-                      Select Department
+                      Select Category
                     </option>
                     {categories.map((c) => (
                       <option key={c.id || c._id} value={c.id || c._id}>

@@ -96,7 +96,7 @@ export const ProductList = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('success', 'Catalog Exported', `${products.length} garments exported to CSV.`);
+    showToast('success', 'Catalog Exported', `${products.length} products exported to CSV.`);
   };
 
   const handleSort = (field) => {
@@ -118,32 +118,32 @@ export const ProductList = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E8E4DC]">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-serif text-3xl font-bold text-[#1A1A1A]">
-              Garment & Atelier Catalog
+            <h1 className="font-serif text-3xl font-bold text-[#1D241C]">
+              Product Catalog
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] uppercase font-mono tracking-widest bg-[#C8A87C]/15 text-[#A68758] font-bold">
-              {pagination.total} Designs
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] uppercase font-mono tracking-widest bg-[#506040]/15 text-[#506040] font-bold">
+              {pagination.total} Products
             </span>
           </div>
-          <p className="text-xs text-[#6B6864] mt-1">
-            Manage luxury garments, departments, stock availability, and colorway variants.
+          <p className="text-xs text-[#687163] mt-1">
+            Manage your products, categories, pricing, stock availability, and variants.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={handleExportCSV}
-            className="px-3.5 py-2 bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-semibold text-[#1A1A1A] transition-colors flex items-center gap-2 shadow-2xs cursor-pointer"
+            className="px-3.5 py-2 bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-semibold text-[#1D241C] transition-colors flex items-center gap-2 shadow-2xs cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-[#6B6864]" />
+            <Download className="w-3.5 h-3.5 text-[#687163]" />
             <span>Export CSV</span>
           </button>
           <Link
             to="/admin/products/new"
-            className="px-4 py-2 bg-[#1A1A1A] hover:bg-[#333333] text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
+            className="px-4 py-2 bg-[#1D241C] hover:bg-[#C69E58] text-white hover:text-[#1D241C] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
           >
-            <PlusCircle className="w-3.5 h-3.5 text-[#C8A87C]" />
-            <span>New Piece</span>
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>Add Product</span>
           </Link>
         </div>
       </div>
@@ -153,16 +153,16 @@ export const ProductList = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Search Box */}
           <div className="relative">
-            <Search className="w-4 h-4 text-[#A68758] absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-[#506040] absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder="Search by title, SKU..."
+              placeholder="Search by name, SKU..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-9 pr-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] placeholder-[#6B6864] focus:outline-none focus:border-[#C8A87C]"
+              className="w-full pl-9 pr-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] placeholder-[#687163] focus:outline-none focus:border-[#C69E58]"
             />
           </div>
 
@@ -173,9 +173,9 @@ export const ProductList = () => {
               setSelectedCategory(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C] cursor-pointer"
+            className="px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
           >
-            <option value="all">All Departments</option>
+            <option value="all">All Categories</option>
             {categories.map((c) => (
               <option key={c.id || c._id} value={c.id || c._id}>
                 {c.name}
@@ -190,9 +190,9 @@ export const ProductList = () => {
               setStockFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C] cursor-pointer"
+            className="px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
           >
-            <option value="all">All Availability Statuses</option>
+            <option value="all">All Stock Statuses</option>
             <option value="in_stock">In Stock (Available)</option>
             <option value="out_of_stock">Out of Stock (Disabled)</option>
           </select>
@@ -201,7 +201,7 @@ export const ProductList = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C] cursor-pointer"
+            className="px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
           >
             <option value="newest">Recently Added</option>
             <option value="oldest">Oldest First</option>
@@ -213,11 +213,11 @@ export const ProductList = () => {
         </div>
 
         {/* Bulk Actions Bar & Density Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#F2EFE9] text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#E8E4DC] text-xs">
           <div className="flex items-center gap-3">
             {selectedIds.length > 0 ? (
               <div className="flex items-center gap-2 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-[#E8E4DC]">
-                <span className="font-semibold text-[#1A1A1A]">
+                <span className="font-semibold text-[#1D241C]">
                   {selectedIds.length} selected
                 </span>
                 <div className="h-3 w-px bg-[#E8E4DC]" />
@@ -226,7 +226,7 @@ export const ProductList = () => {
                     bulkUpdateStatus(selectedIds, 'in_stock');
                     setSelectedIds([]);
                   }}
-                  className="text-[#4A7A5E] hover:underline font-medium cursor-pointer"
+                  className="text-[#506040] hover:underline font-medium cursor-pointer"
                 >
                   Enable Stock
                 </button>
@@ -235,15 +235,15 @@ export const ProductList = () => {
                     bulkUpdateStatus(selectedIds, 'archived');
                     setSelectedIds([]);
                   }}
-                  className="text-[#A5432F] hover:underline font-medium cursor-pointer"
+                  className="text-red-700 hover:underline font-medium cursor-pointer"
                 >
-                  Archive (Soft Delete)
+                  Archive
                 </button>
               </div>
             ) : (
-              <span className="text-[#6B6864]">
-                Showing <span className="font-semibold text-[#1A1A1A]">{products.length}</span> of{' '}
-                {pagination.total} pieces
+              <span className="text-[#687163]">
+                Showing <span className="font-semibold text-[#1D241C]">{products.length}</span> of{' '}
+                {pagination.total} products
               </span>
             )}
           </div>

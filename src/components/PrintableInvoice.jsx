@@ -30,17 +30,23 @@ export const PrintableInvoice = ({ order, onClose }) => {
         {/* The Document Area */}
         <div id="printable-document" className="p-8 sm:p-12 text-[#1A1A1A] bg-white font-sans">
           {/* Header */}
-          <div className="flex items-start justify-between border-b-2 border-[#1A1A1A] pb-6 mb-8">
-            <div>
-              <div className="font-serif text-3xl font-bold tracking-[0.25em] text-[#1A1A1A]">
-                SUMILUX
-              </div>
-              <div className="text-[10px] uppercase tracking-[0.3em] text-[#A68758] font-medium mt-1">
-                Haute Couture & Atelier Operations
-              </div>
-              <div className="text-xs text-[#6B6864] mt-3 space-y-0.5">
-                <div>7 Place Vendôme, 75001 Paris, France</div>
-                <div>concierge@sumilux.com • +33 1 42 68 00 00</div>
+          <div className="flex items-start justify-between border-b-2 border-[#1D241C] pb-6 mb-8">
+            <div className="flex items-center gap-4">
+              <img
+                src="/assets/images/Logo.png"
+                alt="Murari's Glam & Glow"
+                className="h-16 w-auto object-contain"
+              />
+              <div>
+                <div className="font-serif text-2xl font-bold tracking-[0.14em] text-[#1D241C]">
+                  MURARI'S
+                </div>
+                <div className="text-[9.5px] uppercase tracking-[0.25em] text-[#C69E58] font-bold">
+                  Glam & Glow • Atelier Operations
+                </div>
+                <div className="text-xs text-[#687163] mt-1 space-y-0.5">
+                  <div>concierge@murarisglamandglow.com</div>
+                </div>
               </div>
             </div>
             <div className="text-right">

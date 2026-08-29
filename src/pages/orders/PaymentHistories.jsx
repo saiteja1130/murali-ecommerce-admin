@@ -101,7 +101,7 @@ export const PaymentHistories = () => {
 
   // Export CSV
   const handleExportCSV = () => {
-    const headers = ['Transaction ID', 'Order Number', 'Customer', 'Email', 'Gateway', 'Payment Method', 'Amount (USD)', 'Status', 'Date', 'Auth Ref'];
+    const headers = ['Transaction ID', 'Order Number', 'Customer', 'Email', 'Gateway', 'Payment Method', 'Amount (INR)', 'Status', 'Date', 'Auth Ref'];
     const rows = filteredTransactions.map((t) => [
       t.id,
       t.orderNumber,
@@ -119,12 +119,12 @@ export const PaymentHistories = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `sumilux_payment_ledger_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `payment_history_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    showToast('Payment history CSV ledger successfully downloaded', 'success');
+    showToast('Payment history CSV downloaded', 'success');
   };
 
   return (
@@ -132,20 +132,20 @@ export const PaymentHistories = () => {
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl md:text-3xl font-bold text-[#1A1A1A] tracking-tight">
-            Payment Histories & Settlements
+          <h1 className="font-serif text-2xl md:text-3xl font-bold text-[#1D241C] tracking-tight">
+            Payment History & Transactions
           </h1>
-          <p className="text-xs text-[#6B6864] mt-1 font-sans">
-            Audit captured transactions, credit gateway authorizations, and refund records.
+          <p className="text-xs text-[#687163] mt-1 font-sans">
+            Track customer payments, gateways, transaction IDs, and refunds.
           </p>
         </div>
 
         <button
           onClick={handleExportCSV}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-[#F8F6F3] text-[#1A1A1A] border border-[#E8E4DC] rounded-xl text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-[#FAF8F5] text-[#1D241C] border border-[#E8E4DC] rounded-xl text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
         >
-          <Download className="w-4 h-4 text-[#C8A87C]" />
-          <span>Export Ledger (CSV)</span>
+          <Download className="w-4 h-4 text-[#506040]" />
+          <span>Export CSV</span>
         </button>
       </div>
 
@@ -153,54 +153,54 @@ export const PaymentHistories = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-[#E8E4DC] shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B6864]">Total Settled</span>
-            <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#687163]">Total Paid</span>
+            <div className="w-8 h-8 rounded-full bg-[#506040]/10 text-[#506040] flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <p className="font-serif text-2xl font-bold text-[#1A1A1A]">
-            ₹{totalSettled.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <p className="font-serif text-2xl font-bold text-[#1D241C]">
+            ₹{totalSettled.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
-          <p className="text-[11px] text-emerald-700 font-medium">Captured via verified gateways</p>
+          <p className="text-[11px] text-[#506040] font-medium">Successfully completed payments</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-[#E8E4DC] shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B6864]">Pending Authorization</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#687163]">Pending Payments</span>
             <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <p className="font-serif text-2xl font-bold text-[#1A1A1A]">
-            ${pendingSettlement.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <p className="font-serif text-2xl font-bold text-[#1D241C]">
+            ₹{pendingSettlement.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
-          <p className="text-[11px] text-amber-700 font-medium">Awaiting bank wire confirmation</p>
+          <p className="text-[11px] text-amber-700 font-medium">Awaiting payment verification</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-[#E8E4DC] shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B6864]">Refunds Processed</span>
-            <div className="w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#687163]">Refunds Processed</span>
+            <div className="w-8 h-8 rounded-full bg-red-50 text-red-700 flex items-center justify-center">
               <RotateCcw className="w-4 h-4" />
             </div>
           </div>
-          <p className="font-serif text-2xl font-bold text-[#1A1A1A]">
-            ₹{totalRefunded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <p className="font-serif text-2xl font-bold text-[#1D241C]">
+            ₹{totalRefunded.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
-          <p className="text-[11px] text-neutral-500 font-medium">Reversed to original payment source</p>
+          <p className="text-[11px] text-[#687163] font-medium">Refunded to customer</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-[#E8E4DC] shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B6864]">Total Volume</span>
-            <div className="w-8 h-8 rounded-full bg-[#FAF6F0] text-[#C8A87C] flex items-center justify-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#687163]">Total Transactions</span>
+            <div className="w-8 h-8 rounded-full bg-[#FAF8F5] text-[#C69E58] flex items-center justify-center">
               <CreditCard className="w-4 h-4" />
             </div>
           </div>
-          <p className="font-serif text-2xl font-bold text-[#1A1A1A]">
+          <p className="font-serif text-2xl font-bold text-[#1D241C]">
             {transactions.length} Transactions
           </p>
-          <p className="text-[11px] text-[#6B6864] font-medium">100% encrypted & PCI compliant</p>
+          <p className="text-[11px] text-[#687163] font-medium">100% secure payments</p>
         </div>
       </div>
 
@@ -208,13 +208,13 @@ export const PaymentHistories = () => {
       <div className="bg-white p-4 rounded-2xl border border-[#E8E4DC] shadow-2xs flex flex-wrap items-center justify-between gap-3">
         {/* Search */}
         <div className="relative min-w-[240px] flex-1">
-          <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#506040] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search by Transaction ID, Customer, Order # or Auth code..."
+            placeholder="Search by Transaction ID, Customer, Order #..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]"
+            className="w-full pl-10 pr-4 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58]"
           />
         </div>
 
@@ -223,23 +223,22 @@ export const PaymentHistories = () => {
           <select
             value={gatewayFilter}
             onChange={(e) => setGatewayFilter(e.target.value)}
-            className="px-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C] cursor-pointer"
+            className="px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
           >
-            <option value="all">All Payment Gateways</option>
-            <option value="American Express Centurion">Amex Centurion Direct</option>
-            <option value="Stripe / Apple Pay">Stripe / Apple Pay</option>
-            <option value="Klarna Luxury Pay">Klarna Luxury Financing</option>
-            <option value="Direct Wire Transfer">Bank Wire Atelier</option>
+            <option value="all">All Payment Methods</option>
+            <option value="Credit Card">Credit / Debit Card</option>
+            <option value="UPI / Online">UPI / Net Banking</option>
+            <option value="Cash on Delivery">Cash on Delivery</option>
           </select>
 
           {/* Status Filter */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C] cursor-pointer"
+            className="px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
           >
             <option value="all">All Statuses</option>
-            <option value="paid">Settled / Paid</option>
+            <option value="paid">Paid</option>
             <option value="pending">Pending</option>
             <option value="refunded">Refunded</option>
           </select>
@@ -251,11 +250,11 @@ export const PaymentHistories = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-[#FAF8F5] text-[#6B6864] border-b border-[#E8E4DC]">
+              <tr className="bg-[#FAF8F5] text-[#687163] border-b border-[#E8E4DC]">
                 <th className="py-3.5 px-4 font-semibold">Transaction ID</th>
                 <th className="py-3.5 px-4 font-semibold">Order</th>
-                <th className="py-3.5 px-4 font-semibold">Patron Customer</th>
-                <th className="py-3.5 px-4 font-semibold">Channel / Gateway</th>
+                <th className="py-3.5 px-4 font-semibold">Customer</th>
+                <th className="py-3.5 px-4 font-semibold">Payment Method</th>
                 <th className="py-3.5 px-4 font-semibold">Date & Time</th>
                 <th className="py-3.5 px-4 font-semibold">Status</th>
                 <th className="py-3.5 px-4 font-semibold text-right">Settled Amount</th>
@@ -332,8 +331,8 @@ export const PaymentHistories = () => {
                     </td>
 
                     {/* Amount */}
-                    <td className="py-4 px-4 font-mono font-bold text-right text-[#1A1A1A]">
-                      ${t.amount.toFixed(2)}
+                    <td className="py-4 px-4 font-mono font-bold text-right text-[#1D241C]">
+                      ₹{t.amount.toFixed(2)}
                     </td>
 
                     {/* View Order Link */}

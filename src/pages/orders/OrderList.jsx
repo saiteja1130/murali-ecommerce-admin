@@ -15,13 +15,17 @@ export const OrderList = () => {
     const filteredOrders = useMemo(() => {
         return orders
             .filter((o) => {
-            const matchesSearch = o.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                o.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                o.customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            if (!o) return false;
+            const orderNum = o.orderNumber || o.id || '';
+            const custName = o.customer?.name || o.customerName || '';
+            const custEmail = o.customer?.email || o.customerEmail || '';
+            const matchesSearch = orderNum.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                custName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                custEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (o.trackingNumber && o.trackingNumber.toLowerCase().includes(searchQuery.toLowerCase()));
             const matchesStatus = statusTab === 'all' || o.status === statusTab;
             const matchesPayment = paymentFilter === 'all' || o.paymentStatus === paymentFilter;
-            const matchesVip = vipFilter === 'all' || o.customer.vipTier === vipFilter;
+            const matchesVip = vipFilter === 'all' || (o.customer?.vipTier || 'Client') === vipFilter;
             return matchesSearch && matchesStatus && matchesPayment && matchesVip;
         })
             .sort((a, b) => {
@@ -31,23 +35,23 @@ export const OrderList = () => {
                 return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
             }
             else if (sortBy === 'total') {
-                return sortOrder === 'asc' ? a.total - b.total : b.total - a.total;
+                return sortOrder === 'asc' ? (a.total || 0) - (b.total || 0) : (b.total || 0) - (a.total || 0);
             }
             else {
-                return sortOrder === 'asc' ? a.status.localeCompare(b.status) : b.status.localeCompare(a.status);
+                return sortOrder === 'asc' ? (a.status || '').localeCompare(b.status || '') : (b.status || '').localeCompare(a.status || '');
             }
         });
     }, [orders, searchQuery, statusTab, paymentFilter, vipFilter, sortBy, sortOrder]);
     const handleExportCSV = () => {
-        const headers = ['Order Number', 'Date', 'Customer', 'Email', 'Status', 'Payment', 'Total (USD)'];
+        const headers = ['Order Number', 'Date', 'Customer', 'Email', 'Status', 'Payment', 'Total (INR)'];
         const rows = filteredOrders.map((o) => [
-            o.orderNumber,
-            o.createdAt.split('T')[0],
-            `"${o.customer.name}"`,
-            o.customer.email,
+            o.orderNumber || o.id,
+            o.createdAt ? o.createdAt.split('T')[0] : '',
+            `"${o.customer?.name || o.customerName || 'Customer'}"`,
+            o.customer?.email || o.customerEmail || '',
             o.status,
             o.paymentStatus,
-            o.total.toFixed(2),
+            Number(o.total || 0).toFixed(2),
         ]);
         const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
         const encodedUri = encodeURI(csvContent);
@@ -123,19 +127,19 @@ export const OrderList = () => {
         {[
             { id: 'all', label: 'All Orders' },
             { id: 'pending', label: 'Pending Payment' },
-            { id: 'processing', label: 'Atelier Packaging' },
-            { id: 'shipped', label: 'In Transit' },
+            { id: 'processing', label: 'Processing' },
+            { id: 'shipped', label: 'Shipped / In Transit' },
             { id: 'delivered', label: 'Delivered' },
             { id: 'returned', label: 'Returned' },
         ].map((tab) => {
             const count = countsByStatus[tab.id] || 0;
             return (<button key={tab.id} onClick={() => setStatusTab(tab.id)} className={`px-3.5 py-2 rounded-xl font-medium transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer ${statusTab === tab.id
-                    ? 'bg-[#1A1A1A] text-white shadow-xs'
-                    : 'bg-white text-[#6B6864] hover:text-[#1A1A1A] border border-[#E8E4DC]'}`}>
+                    ? 'bg-[#1D241C] text-white shadow-xs'
+                    : 'bg-white text-[#687163] hover:text-[#1D241C] border border-[#E8E4DC]'}`}>
               <span>{tab.label}</span>
               <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${statusTab === tab.id
-                    ? 'bg-[#C8A87C] text-[#1A1A1A] font-bold'
-                    : 'bg-[#FAF8F5] text-[#6B6864]'}`}>
+                    ? 'bg-[#C69E58] text-[#1D241C] font-bold'
+                    : 'bg-[#FAF8F5] text-[#687163]'}`}>
                 {count}
               </span>
             </button>);
@@ -146,23 +150,22 @@ export const OrderList = () => {
       <div className="bg-white rounded-2xl border border-[#E8E4DC] p-4 shadow-2xs">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-[#A68758] absolute left-3 top-2.5"/>
-            <input type="text" placeholder="Search by order #, client name, email, tracking..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-9 pr-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]"/>
+            <Search className="w-4 h-4 text-[#506040] absolute left-3 top-2.5"/>
+            <input type="text" placeholder="Search by order #, customer name, email..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-9 pr-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58]"/>
           </div>
 
-          <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)} className="px-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]">
+          <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)} className="px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer">
             <option value="all">All Payment Statuses</option>
             <option value="paid">Paid</option>
             <option value="pending">Pending Payment</option>
             <option value="refunded">Refunded</option>
           </select>
 
-          <select value={vipFilter} onChange={(e) => setVipFilter(e.target.value)} className="px-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]">
-            <option value="all">All Client Tiers</option>
-            <option value="VIC (Very Important Client)">VIC (Very Important Client)</option>
-            <option value="Haute Member">Haute Member</option>
-            <option value="Private Collector">Private Collector</option>
-            <option value="Client">Standard Client</option>
+          <select value={vipFilter} onChange={(e) => setVipFilter(e.target.value)} className="px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer">
+            <option value="all">All Customer Types</option>
+            <option value="VIP Customer">VIP Customer</option>
+            <option value="Regular Customer">Regular Customer</option>
+            <option value="New Customer">New Customer</option>
           </select>
         </div>
       </div>
@@ -172,14 +175,14 @@ export const OrderList = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-[#E8E4DC] bg-[#FAF8F5] text-[10px] uppercase tracking-wider text-[#6B6864]">
-                <th className="py-3.5 px-4 font-semibold">Order Identifier</th>
+              <tr className="border-b border-[#E8E4DC] bg-[#FAF8F5] text-[10px] uppercase tracking-wider text-[#687163]">
+                <th className="py-3.5 px-4 font-semibold">Order #</th>
                 <th className="py-3.5 px-3 font-semibold">Date</th>
                 <th className="py-3.5 px-3 font-semibold">Customer</th>
-                <th className="py-3.5 px-3 font-semibold">Pieces</th>
+                <th className="py-3.5 px-3 font-semibold">Items</th>
                 <th className="py-3.5 px-3 font-semibold">Payment</th>
-                <th className="py-3.5 px-3 font-semibold">Fulfillment</th>
-                <th className="py-3.5 px-3 font-semibold">Total Amount</th>
+                <th className="py-3.5 px-3 font-semibold">Order Status</th>
+                <th className="py-3.5 px-3 font-semibold">Total (₹)</th>
                 <th className="py-3.5 px-4 font-semibold text-right">Action</th>
               </tr>
             </thead>
@@ -203,11 +206,11 @@ export const OrderList = () => {
             })}
                     </td>
                     <td className="py-3.5 px-3">
-                      <div className="font-semibold text-[#1A1A1A]">{order.customer.name}</div>
-                      <div className="text-[10px] text-[#6B6864]">{order.customer.city || order.customer.email}</div>
+                      <div className="font-semibold text-[#1D241C]">{order.customer?.name || order.customerName || 'Customer'}</div>
+                      <div className="text-[10px] text-[#687163]">{order.customer?.city || order.customer?.email || order.customerEmail || ''}</div>
                     </td>
-                    <td className="py-3.5 px-3 text-[#6B6864] max-w-xs truncate">
-                      {order.items.map((i) => `${i.quantity}x ${i.productName}`).join(', ')}
+                    <td className="py-3.5 px-3 text-[#687163] max-w-xs truncate">
+                      {(order.items || []).map((i) => `${i.quantity || 1}x ${i.productName || i.name || 'Product'}`).join(', ')}
                     </td>
                     <td className="py-3.5 px-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold uppercase ${order.paymentStatus === 'paid'

@@ -144,17 +144,17 @@ export const AdminProvider = ({ children }) => {
     const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
     // Settings
     const [storeSettings, setStoreSettings] = useState({
-        storeName: 'SUMILUX Haute Couture & Prêt-à-Porter',
-        storeEmail: 'concierge@sumilux.com',
+        storeName: "Murari's Glam & Glow Haute Couture",
+        storeEmail: 'concierge@murarisglamandglow.com',
         currency: 'USD',
         currencySymbol: '$',
         freeShippingThreshold: 2000,
         standardVatPercent: 8.0,
         whiteGlovePackagingCost: 150,
         enableAtelierNumberedEditions: true,
-        orderNumberPrefix: 'SMI-',
+        orderNumberPrefix: 'MGG-',
         lowStockThreshold: 4,
-        supportPhone: '+1 (800) 786-4589 / Concierge Line',
+        supportPhone: '+1 (800) 786-4589 / VIP Concierge',
         conciergeHours: '24/7 VIP Client Service',
         returnWindowDays: 30,
         cookieConsentDefault: true,

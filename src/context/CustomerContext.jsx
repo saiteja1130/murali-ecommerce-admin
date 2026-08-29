@@ -33,15 +33,24 @@ export const CustomerProvider = ({ children }) => {
             const response = await api.get(`/api/users?${queryParams.toString()}`);
             const data = response.data;
 
-            const mappedCustomers = data.data.map(user => ({
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                phone: user.phone || '',
-                role: user.role,
-                createdAt: user.createdAt,
-                status: user.isEmailVerified ? 'active' : 'pending',
-            }));
+            const mappedCustomers = (data.data || []).map(user => {
+                const primaryAddr = (user.addresses && user.addresses.length > 0)
+                    ? (user.addresses.find(a => a.isDefault) || user.addresses[0])
+                    : null;
+                return {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone || '',
+                    city: primaryAddr?.city || '',
+                    state: primaryAddr?.state || '',
+                    country: primaryAddr?.country || '',
+                    addresses: user.addresses || [],
+                    role: user.role,
+                    createdAt: user.createdAt,
+                    status: user.isEmailVerified ? 'active' : 'pending',
+                };
+            });
 
             setCustomers(mappedCustomers);
             setPagination({
@@ -61,14 +70,21 @@ export const CustomerProvider = ({ children }) => {
         try {
             const response = await api.get(`/api/users/${id}`);
             const user = response.data.data;
+            const primaryAddr = (user.addresses && user.addresses.length > 0)
+                ? (user.addresses.find(a => a.isDefault) || user.addresses[0])
+                : null;
             return {
                 id: user._id,
                 name: user.name,
                 email: user.email,
                 phone: user.phone || '',
+                city: primaryAddr?.city || '',
+                state: primaryAddr?.state || '',
+                country: primaryAddr?.country || '',
                 role: user.role,
                 createdAt: user.createdAt,
                 status: user.isEmailVerified ? 'active' : 'pending',
+                addresses: user.addresses || [],
             };
         } catch (error) {
             console.error("Failed to fetch customer by ID:", error);

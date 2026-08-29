@@ -56,22 +56,25 @@ export const CustomerList = () => {
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E8E4DC]">
       <div>
         <div className="flex items-center gap-2">
-          <h1 className="font-serif text-3xl font-bold text-[#1A1A1A]">
+          <h1 className="font-serif text-3xl font-bold text-[#1D241C]">
             Customer Directory
           </h1>
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] uppercase font-mono tracking-widest bg-[#C8A87C]/15 text-[#A68758] font-bold">
-            {pagination.total} Patrons
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] uppercase font-mono tracking-widest bg-[#506040]/15 text-[#506040] font-bold">
+            {pagination.total} Customers
           </span>
         </div>
-        <p className="text-xs text-[#6B6864] mt-1">
-          Maintain patron records, contact details, order frequency, and customer lifetime value (LTV).
+        <p className="text-xs text-[#687163] mt-1">
+          View customer records, contact information, order history, and total spending.
         </p>
       </div>
 
       <div className="flex items-center gap-3">
-        <button onClick={handleExportCSV} className="px-3.5 py-2 bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-semibold text-[#1A1A1A] transition-colors flex items-center gap-2 shadow-2xs">
-          <Download className="w-3.5 h-3.5 text-[#6B6864]" />
-          <span>Export Roster</span>
+        <button
+          onClick={handleExportCSV}
+          className="px-3.5 py-2 bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-semibold text-[#1D241C] transition-colors flex items-center gap-2 shadow-2xs cursor-pointer"
+        >
+          <Download className="w-3.5 h-3.5 text-[#687163]" />
+          <span>Export CSV</span>
         </button>
       </div>
     </div>
@@ -80,19 +83,32 @@ export const CustomerList = () => {
     <div className="bg-white rounded-2xl border border-[#E8E4DC] p-4 shadow-2xs">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="relative">
-          <Search className="w-4 h-4 text-[#A68758] absolute left-3 top-2.5" />
-          <input type="text" placeholder="Search by patron name, email..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-9 pr-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]" />
+          <Search className="w-4 h-4 text-[#506040] absolute left-3 top-2.5" />
+          <input
+            type="text"
+            placeholder="Search by customer name, email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58]"
+          />
         </div>
 
-        <select value={tierFilter} onChange={(e) => setTierFilter(e.target.value)} className="px-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]">
-          <option value="all">All Membership Tiers</option>
-          <option value="VIC (Very Important Client)">VIC (Very Important Client)</option>
-          <option value="Haute Member">Haute Member</option>
-          <option value="Private Collector">Private Collector</option>
-          <option value="Client">Standard Client</option>
+        <select
+          value={tierFilter}
+          onChange={(e) => setTierFilter(e.target.value)}
+          className="px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
+        >
+          <option value="all">All Customer Types</option>
+          <option value="VIP Customer">VIP Customer</option>
+          <option value="Regular Customer">Regular Customer</option>
+          <option value="New Customer">New Customer</option>
         </select>
 
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-3 py-2 bg-[#F8F6F3] border border-[#E8E4DC] rounded-xl text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C8A87C]">
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
+        >
           <option value="date_desc">Newest First</option>
           <option value="date_asc">Oldest First</option>
           <option value="name_asc">Name (A-Z)</option>
@@ -106,13 +122,13 @@ export const CustomerList = () => {
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-[#E8E4DC] bg-[#FAF8F5] text-[10px] uppercase tracking-wider text-[#6B6864]">
-              <th className="py-3.5 px-4 font-semibold">Patron Details</th>
+            <tr className="border-b border-[#E8E4DC] bg-[#FAF8F5] text-[10px] uppercase tracking-wider text-[#687163]">
+              <th className="py-3.5 px-4 font-semibold">Customer</th>
               <th className="py-3.5 px-3 font-semibold">Location</th>
-              <th className="py-3.5 px-3 font-semibold">Total LTV Spend</th>
-              <th className="py-3.5 px-3 font-semibold">Orders Count</th>
-              <th className="py-3.5 px-3 font-semibold">Member Since</th>
-              <th className="py-3.5 px-4 font-semibold text-right">Dossier</th>
+              <th className="py-3.5 px-3 font-semibold">Total Spent (₹)</th>
+              <th className="py-3.5 px-3 font-semibold">Total Orders</th>
+              <th className="py-3.5 px-3 font-semibold">Joined Date</th>
+              <th className="py-3.5 px-4 font-semibold text-right">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#F2EFE9] text-xs">
@@ -151,8 +167,8 @@ export const CustomerList = () => {
                 <div>{cust.city || '-'}</div>
                 <div className="text-[10px] text-[#6B6864]">{cust.country || ''}</div>
               </td>
-              <td className="py-3.5 px-3 font-mono-data font-bold text-[#1A1A1A] text-sm">
-                ${(cust.totalSpent || 0).toLocaleString()}
+              <td className="py-3.5 px-3 font-mono font-bold text-[#1D241C] text-sm">
+                ₹{(cust.totalSpent || 0).toLocaleString('en-IN')}
               </td>
               <td className="py-3.5 px-3 font-mono-data font-semibold text-[#1A1A1A]">
                 {cust.orderCount || 0} Orders
