@@ -73,14 +73,6 @@ export const CommandPalette = () => {
         action: () => navigate('/admin/categories'),
       },
       {
-        id: 'act-view-payments',
-        category: 'Quick Actions',
-        title: 'View Payment Histories & Settlements',
-        subtitle: 'Audit transactions, payment methods & gateway authorizations',
-        icon: CreditCard,
-        action: () => navigate('/admin/payments'),
-      },
-      {
         id: 'act-view-hero',
         category: 'Quick Actions',
         title: 'Edit Hero Carousel Banners',
@@ -106,7 +98,7 @@ export const CommandPalette = () => {
         id: `prod-${p.id}`,
         category: 'Products',
         title: p.name,
-        subtitle: `${p.sku} • $₹{p.price.toLocaleString()} • ${p.category}`,
+        subtitle: `${p.sku} • ₹${p.price.toLocaleString('en-IN')} • ${p.category}`,
         icon: Package,
         action: () => navigate(`/admin/products/${p.id}/edit`),
       }));
@@ -114,7 +106,7 @@ export const CommandPalette = () => {
     const matchedOrders = orders
       .filter(
         (o) =>
-          o.orderNumber.toLowerCase().includes(q) ||
+          (o.orderNumber && o.orderNumber.toLowerCase().includes(q)) ||
           (o.customerName && o.customerName.toLowerCase().includes(q)) ||
           (o.customerEmail && o.customerEmail.toLowerCase().includes(q))
       )
@@ -122,8 +114,8 @@ export const CommandPalette = () => {
       .map((o) => ({
         id: `ord-${o.id}`,
         category: 'Orders',
-        title: `Order ${o.orderNumber} — ${o.customerName}`,
-        subtitle: `$${o.total.toFixed(2)} • ${(o.status || '').toUpperCase()} • ${o.paymentStatus || 'PAID'}`,
+        title: `Order ${o.orderNumber} — ${o.customerName || 'Customer'}`,
+        subtitle: `₹${Number(o.total || 0).toFixed(2)} • ${(o.status || '').toUpperCase()} • ${o.paymentStatus || 'PAID'}`,
         icon: ShoppingBag,
         action: () => navigate(`/admin/orders/${o.id}`),
       }));
@@ -140,7 +132,7 @@ export const CommandPalette = () => {
         id: `cst-${c.id}`,
         category: 'Users / Patrons',
         title: c.name,
-        subtitle: `${c.email} • ${c.vipTier} • Spent: $${c.totalSpent.toLocaleString()}`,
+        subtitle: `${c.email} • ${c.vipTier || 'Client'} • Spent: ₹${(c.totalSpent || 0).toLocaleString('en-IN')}`,
         icon: Users,
         action: () => navigate(`/admin/customers/${c.id}`),
       }));
@@ -150,7 +142,6 @@ export const CommandPalette = () => {
       { name: 'Product Catalog', path: '/admin/products', icon: Package },
       { name: 'Category Manager', path: '/admin/categories', icon: Grid },
       { name: 'Orders List', path: '/admin/orders', icon: ShoppingBag },
-      { name: 'Payment Histories', path: '/admin/payments', icon: CreditCard },
       { name: 'User / Customer Directory', path: '/admin/customers', icon: Users },
       { name: 'Hero Carousel Editor', path: '/admin/hero-carousel', icon: Sparkles },
     ]

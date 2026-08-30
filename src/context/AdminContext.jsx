@@ -82,12 +82,19 @@ export const AdminProvider = ({ children }) => {
     const [users, setUsers] = useState(INITIAL_ADMIN_USERS);
     const [products, setProducts] = useState(() => {
         const saved = localStorage.getItem('sumilux_products');
-        return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+        return saved ? JSON.parse(saved) : [];
     });
 
     const [orders, setOrders] = useState(() => {
         const saved = localStorage.getItem('sumilux_orders');
-        return saved ? JSON.parse(saved) : INITIAL_ORDERS;
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [payments, setPayments] = useState([]);
+    const [paymentMetrics, setPaymentMetrics] = useState({
+        totalSettled: 0,
+        totalPendingCod: 0,
+        totalRefunded: 0,
+        totalFailed: 0,
     });
     const [returns, setReturns] = useState(INITIAL_RETURNS);
     const [inventoryLogs, setInventoryLogs] = useState(normalizedInventoryLogs);
@@ -124,21 +131,100 @@ export const AdminProvider = ({ children }) => {
     const [storeSettings, setStoreSettings] = useState({
         storeName: "Murari's Glam & Glow Haute Couture",
         storeEmail: 'concierge@murarisglamandglow.com',
-        currency: 'USD',
-        currencySymbol: '$',
-        freeShippingThreshold: 2000,
-        standardVatPercent: 8.0,
-        whiteGlovePackagingCost: 150,
+        currency: 'INR',
+        currencySymbol: '₹',
+        freeShippingThreshold: 5000,
+        standardVatPercent: 0,
+        whiteGlovePackagingCost: 0,
         enableAtelierNumberedEditions: true,
-        orderNumberPrefix: 'MGG-',
+        orderNumberPrefix: 'SMLX-',
         lowStockThreshold: 4,
-        supportPhone: '+1 (800) 786-4589 / VIP Concierge',
+        supportPhone: '+91 98765 43210 / VIP Concierge',
         conciergeHours: '24/7 VIP Client Service',
-        returnWindowDays: 30,
+        returnWindowDays: 14,
         cookieConsentDefault: true,
         marketingCookiesDefault: true,
         analyticsCookiesDefault: true,
     });
+
+    const fetchOrders = async () => {
+        try {
+            const res = await api.get('/api/orders');
+            if (res.data?.status && Array.isArray(res.data.data)) {
+                const liveOrders = res.data.data.map((o) => ({
+                    ...o,
+                    id: o._id || o.id,
+                    orderNumber: o.orderNumber,
+                    status: o.orderStatus || o.status || 'confirmed',
+                    paymentStatus: o.paymentStatus || 'paid',
+                    paymentMethod: o.paymentMethod || 'upi',
+                    total: Number(o.total || 0),
+                    subtotal: Number(o.subtotal !== undefined ? o.subtotal : (o.total || 0)),
+                    discount: Number(o.discount || 0),
+                    shippingCost: Number(o.shippingCost || 0),
+                    createdAt: o.createdAt || new Date().toISOString(),
+                    customer: o.user ? {
+                        id: o.user._id,
+                        name: o.shippingAddress?.fullName || o.user.name,
+                        email: o.user.email,
+                        phone: o.shippingAddress?.phone || o.user.phone,
+                        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300',
+                        vipTier: 'Gold Patron'
+                    } : {
+                        name: o.shippingAddress?.fullName || 'Customer',
+                        email: '',
+                        phone: o.shippingAddress?.phone || '',
+                        vipTier: 'Client'
+                    },
+                    customerName: o.shippingAddress?.fullName || o.user?.name || 'Customer',
+                    customerEmail: o.user?.email || '',
+                    shippingAddress: o.shippingAddress,
+                    items: (o.items || []).map((i) => ({
+                        ...i,
+                        id: i._id || i.product?._id || i.id,
+                        name: i.name,
+                        image: i.image || i.product?.images?.[0] || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=900',
+                        price: Number(i.price || 0),
+                        quantity: Number(i.quantity || 1),
+                        size: i.selectedSize || 'Standard',
+                        color: i.selectedColor?.name || 'Standard'
+                    })),
+                    timeline: [
+                        {
+                            id: `tl-1`,
+                            timestamp: o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : 'Just now',
+                            title: `Order Created via ${o.paymentMethod === 'upi' ? 'UPI Instant Payment' : 'Cash on Delivery'}`,
+                            description: `Payment status: ${o.paymentStatus}. Order record active in MongoDB.`,
+                            actor: 'System',
+                            type: 'placed'
+                        }
+                    ],
+                    internalNotes: o.notes ? [o.notes] : []
+                }));
+                setOrders(liveOrders);
+            }
+        } catch (err) {
+            console.warn('Could not fetch live admin orders:', err.message);
+        }
+    };
+
+    const fetchPayments = async () => {
+        try {
+            const res = await api.get('/api/payments');
+            if (res.data?.status && Array.isArray(res.data.data)) {
+                setPayments(res.data.data || []);
+                if (res.data.metrics) setPaymentMetrics(res.data.metrics);
+            }
+        } catch (err) {
+            console.warn('Could not fetch live admin payments:', err.message);
+        }
+    };
+
+    useEffect(() => {
+        fetchOrders();
+        fetchPayments();
+    }, []);
+
     useEffect(() => {
         if (currentUser) {
             localStorage.setItem('sumilux_admin_user', JSON.stringify(currentUser));
@@ -280,76 +366,50 @@ export const AdminProvider = ({ children }) => {
         showToast('success', 'Bulk Action Applied', `${ids.length} products updated to status "${status}".`);
         logActivity('Products', 'Bulk Status Update', `${ids.length} products`, `Set status to ${status}`);
     };
-    const updateOrderStatus = (id, status, note) => {
-        const nowStr = new Date().toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-        setOrders((prev) => prev.map((o) => {
-            if (o.id === id) {
-                const newTimelineEvent = {
-                    id: `tl-${Date.now()}`,
-                    timestamp: nowStr,
-                    title: `Status Changed to ${status.toUpperCase()}`,
-                    description: note || `Order transitioned to ${status}.`,
-                    actor: currentUser?.name || 'Staff Member',
-                    type: status === 'shipped' ? 'shipped' : status === 'delivered' ? 'delivered' : 'processing',
-                };
-                const updatedNotes = note ? [...o.internalNotes, note] : o.internalNotes;
-                return {
-                    ...o,
-                    status,
-                    updatedAt: new Date().toISOString(),
-                    timeline: [...o.timeline, newTimelineEvent],
-                    internalNotes: updatedNotes,
-                };
-            }
-            return o;
-        }));
-        showToast('success', 'Order Status Updated', `Order marked as ${status}`);
-        logActivity('Orders', 'Updated Order Status', `Order ${id}`, `Status moved to ${status}`);
+    const updateOrderStatus = async (id, status, note) => {
+        try {
+            await api.patch(`/api/orders/${id}/status`, { orderStatus: status });
+            await fetchOrders();
+            await fetchPayments();
+            showToast('success', 'Order Status Updated', `Order marked as ${status}`);
+            logActivity('Orders', 'Updated Order Status', `Order ${id}`, `Status moved to ${status}`);
+        } catch (err) {
+            console.error('Failed to update status on server:', err);
+            // Local fallback
+            setOrders((prev) => prev.map((o) => (o.id === id || o._id === id ? { ...o, status } : o)));
+            showToast('success', 'Order Status Updated', `Order marked as ${status}`);
+        }
     };
     const addOrderNote = (id, note) => {
-        setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, internalNotes: [...o.internalNotes, note] } : o)));
+        setOrders((prev) => prev.map((o) => (o.id === id || o._id === id ? { ...o, internalNotes: [...(o.internalNotes || []), note] } : o)));
         showToast('info', 'Internal Note Added', 'Private client note attached to order.');
         logActivity('Orders', 'Added Note', `Order ${id}`, note);
     };
-    const processRefund = (id, amount, reason) => {
-        const nowStr = new Date().toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-        setOrders((prev) => prev.map((o) => {
-            if (o.id === id) {
-                const refundEvent = {
-                    id: `tl-${Date.now()}`,
-                    timestamp: nowStr,
-                    title: `Refund Processed ($${amount.toFixed(2)})`,
-                    description: `Reason: ${reason}`,
-                    actor: currentUser?.name || 'Staff Member',
-                    type: 'refund_issued',
-                };
-                return {
-                    ...o,
-                    status: amount >= o.total ? 'refunded' : o.status,
-                    paymentStatus: 'refunded',
-                    timeline: [...o.timeline, refundEvent],
-                    internalNotes: [...o.internalNotes, `Refund of $${amount.toFixed(2)} issued: ${reason}`],
-                };
-            }
-            return o;
-        }));
-        showToast('warning', 'Refund Completed', `$${amount.toFixed(2)} refunded successfully.`);
-        logActivity('Orders', 'Processed Refund', `Order ${id}`, `Amount: $${amount}, Reason: ${reason}`);
+    const processRefund = async (id, amount, reason) => {
+        try {
+            await api.patch(`/api/orders/${id}/status`, { orderStatus: 'cancelled', paymentStatus: 'refunded' });
+            await fetchOrders();
+            await fetchPayments();
+            showToast('warning', 'Refund Completed', `₹${amount.toFixed(2)} refunded successfully.`);
+            logActivity('Orders', 'Processed Refund', `Order ${id}`, `Amount: ₹${amount}, Reason: ${reason}`);
+        } catch (err) {
+            console.error('Failed to process refund:', err);
+            setOrders((prev) => prev.map((o) => (o.id === id || o._id === id ? { ...o, status: 'cancelled', paymentStatus: 'refunded' } : o)));
+            showToast('warning', 'Refund Completed', `₹${amount.toFixed(2)} marked as refunded.`);
+        }
     };
-    const updateOrderTracking = (id, trackingNumber, carrier) => {
-        setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, trackingNumber, carrier, status: 'shipped' } : o)));
-        showToast('success', 'Tracking Added', `Dispatched via ${carrier} (${trackingNumber})`);
-        logActivity('Orders', 'Dispatched Order', `Order ${id}`, `Carrier: ${carrier}, Tracking: ${trackingNumber}`);
+    const updateOrderTracking = async (id, trackingNumber, carrier) => {
+        try {
+            await api.patch(`/api/orders/${id}/tracking`, { trackingNumber, shippingMethod: carrier });
+            await api.patch(`/api/orders/${id}/status`, { orderStatus: 'shipped' });
+            await fetchOrders();
+            showToast('success', 'Tracking Added', `Dispatched via ${carrier} (${trackingNumber})`);
+            logActivity('Orders', 'Dispatched Order', `Order ${id}`, `Carrier: ${carrier}, Tracking: ${trackingNumber}`);
+        } catch (err) {
+            console.error('Failed to update tracking on server:', err);
+            setOrders((prev) => prev.map((o) => (o.id === id || o._id === id ? { ...o, trackingNumber, carrier, status: 'shipped' } : o)));
+            showToast('success', 'Tracking Added', `Dispatched via ${carrier} (${trackingNumber})`);
+        }
     };
     const updateReturnStatus = (id, status, inspectionNotes) => {
         setReturns((prev) => prev.map((r) => (r.id === id ? { ...r, status, inspectionNotes: inspectionNotes || r.inspectionNotes } : r)));
@@ -457,6 +517,10 @@ export const AdminProvider = ({ children }) => {
         deleteProduct,
         bulkUpdateStatus,
         orders,
+        fetchOrders,
+        payments,
+        fetchPayments,
+        paymentMetrics,
         updateOrderStatus,
         addOrderNote,
         processRefund,

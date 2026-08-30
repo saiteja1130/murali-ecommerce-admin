@@ -313,9 +313,8 @@ export const CustomerProfile = () => {
                 {customer.addresses.map((addr, idx) => (
                   <div
                     key={addr._id || addr.id || idx}
-                    className={`p-3.5 rounded-xl border text-xs space-y-1 ${
-                      addr.isDefault ? 'border-[#506040] bg-[#FAF8F5]' : 'border-[#E8E4DC] bg-white'
-                    }`}
+                    className={`p-3.5 rounded-xl border text-xs space-y-1 ${addr.isDefault ? 'border-[#506040] bg-[#FAF8F5]' : 'border-[#E8E4DC] bg-white'
+                      }`}
                   >
                     <div className="flex items-center justify-between font-bold text-[#1D241C]">
                       <span>{addr.fullName || customer.name}</span>
@@ -347,19 +346,6 @@ export const CustomerProfile = () => {
 
           {/* Customer Notes Card */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
-            <h3 className="font-serif text-base font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-2 flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-[#506040]" />
-              <span>Customer Notes & Preferences</span>
-            </h3>
-
-            <div className="space-y-2.5">
-              {notesList.map((note, idx) => (
-                <div key={idx} className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E8E4DC] text-xs text-[#1D241C] leading-relaxed">
-                  {note}
-                </div>
-              ))}
-            </div>
-
             <form onSubmit={handleAddNote} className="space-y-2 pt-2">
               <textarea
                 rows={2}

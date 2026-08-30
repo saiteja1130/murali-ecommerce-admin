@@ -105,16 +105,9 @@ export const OrderList = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin/payments"
-            className="px-3.5 py-2 bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-semibold text-[#1A1A1A] transition-colors flex items-center gap-2 shadow-2xs"
-          >
-            <CreditCard className="w-3.5 h-3.5 text-[#C8A87C]" />
-            <span>Payment Histories</span>
-          </Link>
           <button
             onClick={handleExportCSV}
-            className="px-3.5 py-2 bg-[#1A1A1A] hover:bg-[#333333] text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 shadow-sm"
+            className="px-3.5 py-2 bg-[#1A1A1A] hover:bg-[#333333] text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-[#C8A87C]" />
             <span>Export Orders</span>
@@ -126,11 +119,11 @@ export const OrderList = () => {
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-[#E8E4DC] text-xs">
         {[
             { id: 'all', label: 'All Orders' },
-            { id: 'pending', label: 'Pending Payment' },
+            { id: 'confirmed', label: 'Confirmed' },
             { id: 'processing', label: 'Processing' },
             { id: 'shipped', label: 'Shipped / In Transit' },
             { id: 'delivered', label: 'Delivered' },
-            { id: 'returned', label: 'Returned' },
+            { id: 'cancelled', label: 'Cancelled' },
         ].map((tab) => {
             const count = countsByStatus[tab.id] || 0;
             return (<button key={tab.id} onClick={() => setStatusTab(tab.id)} className={`px-3.5 py-2 rounded-xl font-medium transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer ${statusTab === tab.id
@@ -157,7 +150,7 @@ export const OrderList = () => {
           <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)} className="px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer">
             <option value="all">All Payment Statuses</option>
             <option value="paid">Paid</option>
-            <option value="pending">Pending Payment</option>
+            <option value="cod_pending">Cash on Delivery (Pending)</option>
             <option value="refunded">Refunded</option>
           </select>
 
@@ -214,11 +207,13 @@ export const OrderList = () => {
                     </td>
                     <td className="py-3.5 px-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold uppercase ${order.paymentStatus === 'paid'
-                ? 'bg-[#4A7A5E]/15 text-[#4A7A5E]'
+                ? 'bg-[#4A7A5E]/15 text-[#4A7A5E] border border-[#4A7A5E]/30'
+                : order.paymentStatus === 'cod_pending'
+                ? 'bg-blue-50 text-blue-700 border border-blue-200'
                 : order.paymentStatus === 'refunded'
-                    ? 'bg-[#A5432F]/15 text-[#A5432F]'
-                    : 'bg-[#B8863F]/15 text-[#B8863F]'}`}>
-                        {order.paymentStatus}
+                ? 'bg-[#A5432F]/15 text-[#A5432F] border border-[#A5432F]/30'
+                : 'bg-neutral-100 text-neutral-700 border border-neutral-200'}`}>
+                        {order.paymentStatus === 'cod_pending' ? 'COD PENDING' : order.paymentStatus}
                       </span>
                     </td>
                     <td className="py-3.5 px-3">

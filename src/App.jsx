@@ -22,10 +22,9 @@ import ProductForm from './pages/products/ProductForm';
 import ProductVariants from './pages/products/ProductVariants';
 import CategoryManager from './pages/products/CategoryManager';
 
-// Orders & Payment Module
+// Orders Module
 import OrderList from './pages/orders/OrderList';
 import OrderDetail from './pages/orders/OrderDetail';
-import PaymentHistories from './pages/orders/PaymentHistories';
 
 // Users / Customers Module
 import CustomerList from './pages/customers/CustomerList';
@@ -70,11 +69,9 @@ export function App() {
             <Route path="categories" element={<CategoryManager />} />
             <Route path="products/categories" element={<CategoryManager />} />
 
-            {/* 3. Orders & Payment Histories */}
+            {/* 3. Orders Management */}
             <Route path="orders" element={<OrderList />} />
             <Route path="orders/:id" element={<OrderDetail />} />
-            <Route path="payments" element={<PaymentHistories />} />
-            <Route path="orders/payments" element={<PaymentHistories />} />
 
             {/* 4. Users / Customers & Profile Details */}
             <Route path="customers" element={<CustomerList />} />

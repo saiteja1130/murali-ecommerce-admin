@@ -58,11 +58,6 @@ export const Sidebar = () => {
           badge: pendingOrdersCount > 0 ? pendingOrdersCount : undefined
         },
         {
-          name: 'Payment History',
-          path: '/admin/payments',
-          icon: CreditCard
-        },
-        {
           name: 'Customers',
           path: '/admin/customers',
           icon: Users

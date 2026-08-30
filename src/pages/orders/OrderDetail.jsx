@@ -7,7 +7,6 @@ import {
   Printer,
   RotateCcw,
   CheckCircle2,
-  Truck,
   CreditCard,
   User,
   MapPin,
@@ -27,8 +26,6 @@ export const OrderDetail = () => {
   const [refundReason, setRefundReason] = useState('Customer requested return/refund');
   const [refundAmount, setRefundAmount] = useState(order ? order.total : 0);
   const [newNote, setNewNote] = useState('');
-  const [carrierInput, setCarrierInput] = useState(order?.carrier || 'Express Delivery');
-  const [trackingInput, setTrackingInput] = useState(order?.trackingNumber || 'SMI-TRK-8921104');
 
   if (!order) {
     return (
@@ -42,7 +39,7 @@ export const OrderDetail = () => {
   }
 
   const handleStatusChange = (newStatus) => {
-    updateOrderStatus(order.id, newStatus, trackingInput, carrierInput);
+    updateOrderStatus(order.id, newStatus);
   };
 
   const handleAddNote = (e) => {
@@ -191,117 +188,81 @@ export const OrderDetail = () => {
             <h2 className="font-serif text-lg font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-3 flex items-center justify-between">
               <span>Products in Order</span>
               <span className="text-xs font-normal text-[#687163] font-sans">
-                {order.items.length} Item(s)
+                {(order.items || []).length} Item(s)
               </span>
             </h2>
 
             <div className="divide-y divide-[#E8E4DC]">
-              {order.items.map((item) => (
-                <div key={item.id} className="py-4 flex items-center gap-4 first:pt-0 last:pb-0">
-                  <img
-                    src={item.image}
-                    alt={item.productName}
-                    className="w-16 h-20 rounded-xl object-cover border border-[#E8E4DC] shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm text-[#1D241C]">
-                      {item.productName}
+              {(order.items || []).map((item, idx) => {
+                const unitPrice = Number(item.price !== undefined ? item.price : (item.unitPrice !== undefined ? item.unitPrice : (item.product?.price || 0)));
+                const qty = Number(item.quantity || 1);
+                const itemTotal = Number(item.totalPrice !== undefined ? item.totalPrice : (unitPrice * qty));
+                const itemName = item.name || item.productName || item.product?.name || 'Garment Piece';
+                const itemColor = item.color || (typeof item.selectedColor === 'object' ? item.selectedColor?.name : item.selectedColor) || 'Standard';
+                const itemSize = item.size || item.selectedSize || 'Standard';
+                const itemImg = item.image || item.product?.image || (Array.isArray(item.product?.images) && item.product.images[0]) || '';
+
+                return (
+                  <div key={item.id || item._id || idx} className="py-4 flex items-center gap-4 first:pt-0 last:pb-0">
+                    <img
+                      src={itemImg}
+                      alt={itemName}
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=900';
+                      }}
+                      className="w-16 h-20 rounded-xl object-cover border border-[#E8E4DC] shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm text-[#1D241C]">
+                        {itemName}
+                      </div>
+                      <div className="text-xs text-[#687163] mt-0.5 flex flex-wrap items-center gap-2">
+                        {item.sku && <span className="font-mono">{item.sku}</span>}
+                        <span>•</span>
+                        <span>Color: <strong>{itemColor}</strong></span>
+                        <span>•</span>
+                        <span>Size: <strong>{itemSize}</strong></span>
+                      </div>
                     </div>
-                    <div className="text-xs text-[#687163] mt-0.5 flex flex-wrap items-center gap-2">
-                      <span className="font-mono">{item.sku}</span>
-                      <span>•</span>
-                      <span>Color: <strong>{item.color}</strong></span>
-                      <span>•</span>
-                      <span>Size: <strong>{item.size}</strong></span>
+                    <div className="text-right font-mono">
+                      <div className="text-xs text-[#687163]">
+                        {qty} x ₹{unitPrice.toFixed(2)}
+                      </div>
+                      <div className="font-bold text-sm text-[#1D241C] mt-0.5">
+                        ₹{itemTotal.toFixed(2)}
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right font-mono">
-                    <div className="text-xs text-[#687163]">
-                      {item.quantity} x ₹{item.unitPrice.toLocaleString('en-IN')}
-                    </div>
-                    <div className="font-bold text-sm text-[#1D241C] mt-0.5">
-                      ₹{item.totalPrice.toLocaleString('en-IN')}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Financial Totals Calculation */}
             <div className="pt-4 border-t border-[#E8E4DC] space-y-2 text-xs">
               <div className="flex justify-between text-[#687163]">
                 <span>Subtotal</span>
-                <span className="font-mono">₹{order.subtotal.toLocaleString('en-IN')}</span>
+                <span className="font-mono">₹{Number(order.subtotal !== undefined ? order.subtotal : (order.total || 0)).toFixed(2)}</span>
               </div>
-              {order.discount > 0 && (
+              {Number(order.discount || 0) > 0 && (
                 <div className="flex justify-between text-[#506040]">
                   <span>Discount</span>
-                  <span className="font-mono">-₹{order.discount.toLocaleString('en-IN')}</span>
+                  <span className="font-mono">-₹{Number(order.discount).toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between text-[#687163]">
                 <span>Delivery / Shipping</span>
                 <span className="font-mono">
-                  {order.shipping === 0 ? 'Free Delivery' : `₹${order.shipping.toLocaleString('en-IN')}`}
+                  {Number(order.shippingCost !== undefined ? order.shippingCost : (order.shipping || 0)) === 0 ? 'Free Delivery' : `₹${Number(order.shippingCost !== undefined ? order.shippingCost : (order.shipping || 0)).toFixed(2)}`}
                 </span>
               </div>
               <div className="flex justify-between text-[#687163]">
                 <span>Estimated Taxes / GST</span>
-                <span className="font-mono">₹{order.tax.toFixed(2)}</span>
+                <span className="font-mono">₹0.00 (Inclusive)</span>
               </div>
               <div className="pt-2 border-t-2 border-[#1D241C] flex justify-between font-bold text-base text-[#1D241C]">
                 <span>Total Amount</span>
-                <span className="font-mono">₹{order.total.toFixed(2)}</span>
+                <span className="font-mono">₹{Number(order.total || 0).toFixed(2)}</span>
               </div>
-            </div>
-          </div>
-
-          {/* Delivery & Tracking Assignment */}
-          <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
-            <h2 className="font-serif text-lg font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-3 flex items-center gap-2">
-              <Truck className="w-4 h-4 text-[#506040]" />
-              <span>Shipping Information</span>
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1">
-                  Shipping Provider
-                </label>
-                <input
-                  type="text"
-                  value={carrierInput}
-                  onChange={(e) => setCarrierInput(e.target.value)}
-                  placeholder="BlueDart / Delhivery / DTDC / Speed Post"
-                  className="w-full px-3.5 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1">
-                  Tracking Number / Airway Bill
-                </label>
-                <input
-                  type="text"
-                  value={trackingInput}
-                  onChange={(e) => setTrackingInput(e.target.value)}
-                  placeholder="e.g. BD-8921104"
-                  className="w-full px-3.5 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-mono text-[#1D241C]"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  updateOrderStatus(order.id, order.status, trackingInput, carrierInput);
-                  showToast('success', 'Tracking Updated', 'Delivery information has been saved.');
-                }}
-                className="px-4 py-1.5 bg-[#1D241C] hover:bg-[#C69E58] text-white hover:text-[#1D241C] text-xs font-semibold rounded-xl transition-colors cursor-pointer"
-              >
-                Save Tracking Info
-              </button>
             </div>
           </div>
 
@@ -435,23 +396,55 @@ export const OrderDetail = () => {
           </div>
 
           {/* Payment Method Card */}
-          <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-3">
+          <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
             <h3 className="font-serif text-base font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-2 flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-[#506040]" />
               <span>Payment Details</span>
             </h3>
 
-            <div className="text-xs space-y-2">
+            <div className="text-xs space-y-2.5">
               <div className="flex justify-between">
                 <span className="text-[#687163]">Payment Method</span>
-                <span className="font-medium text-[#1D241C]">{order.paymentMethod}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#687163]">Status</span>
-                <span className="font-mono font-bold uppercase text-[#506040] bg-[#506040]/10 px-2 py-0.5 rounded">
-                  {order.paymentStatus}
+                <span className="font-medium text-[#1D241C]">
+                  {order.paymentMethod === 'upi' ? 'UPI Instant Payment' : order.paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : order.paymentMethod}
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[#687163]">Payment Status</span>
+                <span
+                  className={`font-mono font-bold uppercase px-2 py-0.5 rounded text-[11px] ${
+                    order.paymentStatus === 'paid'
+                      ? 'text-[#4A7A5E] bg-[#4A7A5E]/15 border border-[#4A7A5E]/30'
+                      : order.paymentStatus === 'cod_pending'
+                      ? 'text-blue-700 bg-blue-50 border border-blue-200'
+                      : order.paymentStatus === 'refunded'
+                      ? 'text-[#A5432F] bg-[#A5432F]/15 border border-[#A5432F]/30'
+                      : 'text-[#B8863F] bg-[#B8863F]/15 border border-[#B8863F]/30'
+                  }`}
+                >
+                  {order.paymentStatus === 'cod_pending' ? 'COD PENDING' : order.paymentStatus}
+                </span>
+              </div>
+              {order.razorpay?.paymentId && (
+                <div className="flex justify-between pt-1 border-t border-[#E8E4DC]">
+                  <span className="text-[#687163]">Transaction ID</span>
+                  <span className="font-mono font-bold text-[#1D241C]">{order.razorpay.paymentId}</span>
+                </div>
+              )}
+              {order.createdAt && (
+                <div className="flex justify-between pt-1 border-t border-[#E8E4DC]">
+                  <span className="text-[#687163]">Date & Time</span>
+                  <span className="text-[#1D241C]">
+                    {new Date(order.createdAt).toLocaleString('en-IN', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
