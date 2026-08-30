@@ -34,6 +34,9 @@ import CustomerProfile from './pages/customers/CustomerProfile';
 // Hero Carousel Studio Module
 import HeroCarouselEditor from './pages/content/HeroCarouselEditor';
 
+// Store Settings Module
+import StoreSettings from './pages/settings/StoreSettings';
+
 export function App() {
   return (
     <RootProvider>
@@ -82,6 +85,10 @@ export function App() {
             {/* 5. Hero Carousel Studio */}
             <Route path="hero-carousel" element={<HeroCarouselEditor />} />
             <Route path="content/hero" element={<HeroCarouselEditor />} />
+
+            {/* 6. Store Settings */}
+            <Route path="settings" element={<StoreSettings />} />
+            <Route path="settings/store" element={<StoreSettings />} />
           </Route>
 
           {/* Catch-all Wildcard Route */}

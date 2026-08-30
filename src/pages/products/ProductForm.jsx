@@ -21,7 +21,7 @@ import {
 export const ProductForm = ({ mode }) => {
   const { id } = useParams();
   const { addProduct, updateProduct, fetchProductById } = useProduct();
-  const { categories } = useCategory();
+  const { mainCategories, categories } = useCategory();
   const { showToast } = useAdmin();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -30,6 +30,7 @@ export const ProductForm = ({ mode }) => {
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [sku, setSku] = useState('');
+  const [mainCategory, setMainCategory] = useState('');
   const [category, setCategory] = useState('');
   const [price, setPrice] = useState('');
   const [originalPrice, setOriginalPrice] = useState('');
@@ -52,12 +53,32 @@ export const ProductForm = ({ mode }) => {
   const [isLoadingProduct, setIsLoadingProduct] = useState(mode === 'edit');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Auto-select first category if available in create mode
+  // Filtered subcategories based on chosen Main Category
+  const availableSubcategories = React.useMemo(() => {
+    if (!mainCategory) return categories;
+    return categories.filter((c) => {
+      const mId = c.mainCategory?._id || c.mainCategory?.id || c.mainCategory;
+      const mSlug = c.mainCategory?.slug || '';
+      return mId === mainCategory || mSlug.toLowerCase() === mainCategory.toLowerCase();
+    });
+  }, [mainCategory, categories]);
+
+  // Auto-select first main category and subcategory in create mode
   useEffect(() => {
-    if (categories.length > 0 && !category && mode === 'create') {
-      setCategory(categories[0].id || categories[0]._id);
+    if (mode === 'create') {
+      if (mainCategories.length > 0 && !mainCategory) {
+        setMainCategory(mainCategories[0].id || mainCategories[0]._id);
+      }
     }
-  }, [categories, category, mode]);
+  }, [mainCategories, mainCategory, mode]);
+
+  useEffect(() => {
+    if (mode === 'create' && availableSubcategories.length > 0) {
+      if (!category || !availableSubcategories.some((c) => (c.id || c._id) === category)) {
+        setCategory(availableSubcategories[0].id || availableSubcategories[0]._id);
+      }
+    }
+  }, [availableSubcategories, category, mode]);
 
   // Load existing data if in edit mode
   useEffect(() => {
@@ -70,6 +91,8 @@ export const ProductForm = ({ mode }) => {
             setName(p.name || '');
             setSlug(p.slug || '');
             setSku(p.sku || '');
+            const mainCatId = p.mainCategoryId || p.mainCategory?._id || p.mainCategory || p.category?.mainCategory?._id || p.category?.mainCategory || '';
+            setMainCategory(mainCatId);
             setCategory(p.categoryId || p.category?._id || p.category || '');
             setPrice(p.price || 0);
             setOriginalPrice(p.originalPrice || '');
@@ -205,6 +228,9 @@ export const ProductForm = ({ mode }) => {
       formData.append('name', name.trim());
       formData.append('slug', slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
       formData.append('sku', sku.trim().toUpperCase());
+      if (mainCategory) {
+        formData.append('mainCategory', mainCategory);
+      }
       formData.append('category', category);
       formData.append('price', price.toString());
       if (originalPrice) {
@@ -733,17 +759,60 @@ export const ProductForm = ({ mode }) => {
           {/* Dynamic Category Card */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
             <h3 className="font-serif text-base font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-2">
-              Category
+              Department & Category
             </h3>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
+              {/* Main Category / Department Selection */}
               <div>
                 <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1">
-                  Product Category *
+                  Main Department *
                 </label>
-                {categories.length === 0 ? (
+                {mainCategories.length === 0 ? (
                   <div className="p-3 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#687163]">
-                    No categories found. Please create one in the{' '}
+                    No main departments found. Please create one in the{' '}
+                    <Link to="/admin/categories" className="text-[#C69E58] font-semibold underline">
+                      Category Manager
+                    </Link>
+                    .
+                  </div>
+                ) : (
+                  <select
+                    value={mainCategory}
+                    onChange={(e) => {
+                      const newMain = e.target.value;
+                      setMainCategory(newMain);
+                      // Auto pick first subcategory in new department
+                      const subcats = categories.filter((c) => {
+                        const mId = c.mainCategory?._id || c.mainCategory?.id || c.mainCategory;
+                        return mId === newMain || c.mainCategory?.slug === newMain;
+                      });
+                      if (subcats.length > 0) {
+                        setCategory(subcats[0].id || subcats[0]._id);
+                      }
+                    }}
+                    className="w-full px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
+                  >
+                    <option value="" disabled>
+                      Select Main Department
+                    </option>
+                    {mainCategories.map((m) => (
+                      <option key={m.id || m._id} value={m.id || m._id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Subcategory Selection */}
+              <div>
+                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider mb-1">
+                  Subcategory *
+                </label>
+                {availableSubcategories.length === 0 ? (
+                  <div className="p-3 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#687163]">
+                    No subcategories available for this department. Please create one in the{' '}
                     <Link to="/admin/categories" className="text-[#C69E58] font-semibold underline">
                       Category Manager
                     </Link>
@@ -757,9 +826,9 @@ export const ProductForm = ({ mode }) => {
                     className="w-full px-3 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
                   >
                     <option value="" disabled>
-                      Select Category
+                      Select Subcategory
                     </option>
-                    {categories.map((c) => (
+                    {availableSubcategories.map((c) => (
                       <option key={c.id || c._id} value={c.id || c._id}>
                         {c.name}
                       </option>

@@ -12,7 +12,8 @@ import {
   CreditCard, 
   ChevronLeft, 
   ChevronRight, 
-  Crown 
+  Crown,
+  Settings
 } from 'lucide-react';
 
 export const Sidebar = () => {
@@ -75,6 +76,16 @@ export const Sidebar = () => {
           name: 'Hero Carousel',
           path: '/admin/hero-carousel',
           icon: Sparkles
+        }
+      ]
+    },
+    {
+      title: 'STORE CONFIGURATION',
+      items: [
+        {
+          name: 'Store Settings',
+          path: '/admin/settings',
+          icon: Settings
         }
       ]
     }

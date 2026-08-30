@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { INITIAL_ADMIN_USERS, INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_RETURNS, INITIAL_INVENTORY_LOGS, INITIAL_PROMOTIONS, INITIAL_SHOP_THE_LOOK_SCENE, INITIAL_LOOKBOOK_ITEMS, INITIAL_REVIEWS, INITIAL_NOTIFICATIONS, INITIAL_ACTIVITY_LOGS } from '../data/mockData';
+import { INITIAL_ADMIN_USERS, INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_RETURNS, INITIAL_INVENTORY_LOGS, INITIAL_PROMOTIONS, INITIAL_SHOP_THE_LOOK_SCENE, INITIAL_NOTIFICATIONS, INITIAL_ACTIVITY_LOGS } from '../data/mockData';
 import api from './api';
 
 const defaultAdminContext = {
@@ -13,8 +13,6 @@ const defaultAdminContext = {
     promotions: [],
     shopTheLookList: [],
     shopTheLook: null,
-    lookbooks: [],
-    reviews: [],
     activityLogs: [],
     notifications: [],
     toasts: [],
@@ -38,10 +36,6 @@ const defaultAdminContext = {
     updatePromotion: () => {},
     removePromotion: () => {},
     updateShopTheLook: () => {},
-    updateLookbook: () => {},
-    addReview: () => {},
-    updateReview: () => {},
-    removeReview: () => {},
     fetchCustomers: async () => {},
 };
 
@@ -67,20 +61,6 @@ const normalizedShopTheLook = {
         label: p.label,
     })),
 };
-const normalizedLookbooks = INITIAL_LOOKBOOK_ITEMS.map((lb) => ({
-    ...lb,
-    season: 'Autumn / Winter 2026',
-    photographer: 'Hélène Desrosiers, Paris',
-    image: lb.imageUrl || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=800&auto=format&fit=crop',
-    description: 'Photographed in historic Parisian salons exploring draped bias textures and shadow play.',
-}));
-const normalizedReviews = INITIAL_REVIEWS.map((r) => ({
-    ...r,
-    author: r.customerName || 'Victoria V.',
-    createdAt: r.date || '2026-08-18',
-    isVerifiedPurchase: r.isVerifiedBuyer !== false,
-    officialReply: r.adminReply,
-}));
 const normalizedInventoryLogs = INITIAL_INVENTORY_LOGS.map((inv) => ({
     ...inv,
     createdAt: inv.timestamp || new Date().toISOString(),
@@ -134,8 +114,6 @@ export const AdminProvider = ({ children }) => {
         },
     ]);
     const [shopTheLook, setShopTheLook] = useState(normalizedShopTheLook);
-    const [lookbooks, setLookbooks] = useState(normalizedLookbooks);
-    const [reviews, setReviews] = useState(normalizedReviews);
     const [activityLogs, setActivityLogs] = useState(INITIAL_ACTIVITY_LOGS);
     const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
     const [toasts, setToasts] = useState([]);
@@ -451,51 +429,6 @@ export const AdminProvider = ({ children }) => {
         setShopTheLook((prev) => ({ ...prev, ...sceneUpdates }));
         showToast('success', 'Hotspot Scene Saved', 'Interactive pins updated on editorial photograph.');
     };
-    const addLookbook = (entry) => {
-        const newItem = {
-            ...entry,
-            id: `lb-${Date.now().toString().slice(-4)}`,
-            likes: entry.likes || 0,
-            imageUrl: entry.image || entry.imageUrl,
-        };
-        setLookbooks((prev) => [...prev, newItem]);
-        showToast('success', 'Lookbook Tile Added', 'Editorial look added to gallery.');
-    };
-    const addLookbookItem = (itemData) => {
-        addLookbook(itemData);
-    };
-    const updateLookbook = (id, updates) => {
-        setLookbooks((prev) => prev.map((lb) => (lb.id === id ? { ...lb, ...updates } : lb)));
-        showToast('success', 'Lookbook Story Updated', 'Story saved.');
-    };
-    const deleteLookbook = (id) => {
-        setLookbooks((prev) => prev.filter((lb) => lb.id !== id));
-        showToast('warning', 'Lookbook Item Removed', 'Image removed from feed.');
-    };
-    const deleteLookbookItem = (id) => {
-        deleteLookbook(id);
-    };
-    const approveReview = (id) => {
-        setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'approved' } : r)));
-        showToast('success', 'Review Approved', 'Published to customer-facing product page.');
-        logActivity('Reviews', 'Approved Review', `Review ${id}`, 'Published to storefront');
-    };
-    const rejectReview = (id) => {
-        setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'rejected' } : r)));
-        showToast('warning', 'Review Moderated', 'Review marked as rejected.');
-    };
-    const featureReview = (id) => {
-        setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, isFeatured: !r.isFeatured } : r)));
-        showToast('info', 'Featured Status Toggled', 'Review homepage visibility changed.');
-    };
-    const toggleFeaturedReview = (id) => {
-        featureReview(id);
-    };
-    const replyToReview = (id, reply) => {
-        setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, officialReply: reply, adminReply: reply, status: 'approved' } : r)));
-        showToast('success', 'Reply Published', 'Official brand response posted.');
-        logActivity('Reviews', 'Replied to Review', `Review ${id}`, reply);
-    };
     const markNotificationAsRead = (id) => {
         setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
     };
@@ -540,19 +473,6 @@ export const AdminProvider = ({ children }) => {
         shopTheLook,
         updateLook,
         updateShopTheLook,
-        lookbooks,
-        lookbook: lookbooks,
-        addLookbook,
-        addLookbookItem,
-        updateLookbook,
-        deleteLookbook,
-        deleteLookbookItem,
-        reviews,
-        approveReview,
-        rejectReview,
-        featureReview,
-        toggleFeaturedReview,
-        replyToReview,
         activityLogs,
         logActivity,
         notifications,
