@@ -53,18 +53,22 @@ export const CustomerProfile = () => {
     );
   }
 
-  // Find all orders placed by this customer safely
-  const customerOrders = (orders || []).filter((o) => {
-    if (!o) return false;
-    const orderCustomerId = o.customer?.id || o.customer?._id || o.customerId || o.user?._id || o.user;
-    const orderCustomerEmail = o.customer?.email || o.email;
-    return (
-      (orderCustomerId && String(orderCustomerId) === String(customer.id)) ||
-      (orderCustomerEmail && customer.email && orderCustomerEmail.toLowerCase() === customer.email.toLowerCase())
-    );
-  });
+  // Find all orders placed by this customer safely (sorted newest first)
+  const rawCustomerOrders = (customer.orders && customer.orders.length > 0)
+    ? customer.orders
+    : (orders || []).filter((o) => {
+        if (!o) return false;
+        const orderCustomerId = o.customer?.id || o.customer?._id || o.customerId || o.user?._id || o.user;
+        const orderCustomerEmail = o.customer?.email || o.email;
+        return (
+          (orderCustomerId && String(orderCustomerId) === String(customer.id)) ||
+          (orderCustomerEmail && customer.email && orderCustomerEmail.toLowerCase() === customer.email.toLowerCase())
+        );
+      });
 
-  const totalSpent = customerOrders.reduce((sum, ord) => sum + Number(ord?.total || 0), 0) || Number(customer.totalSpent || 0);
+  const customerOrders = [...rawCustomerOrders].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+  const totalSpent = Number(customer.totalSpent) || customerOrders.reduce((sum, ord) => sum + Number(ord?.total || 0), 0);
 
   const handleUpdateVIPTier = (newTier) => {
     setVipTier(newTier);
@@ -118,6 +122,7 @@ export const CustomerProfile = () => {
               className="bg-[#FAF8F5] border border-[#E8E4DC] rounded-lg px-2 py-1 text-xs font-semibold text-[#1D241C] focus:outline-none focus:border-[#C69E58]"
             >
               <option value="Client">Standard Client</option>
+              <option value="Regular Customer">Regular Customer</option>
               <option value="Gold Member">Gold Member</option>
               <option value="Platinum Member">Platinum Member</option>
               <option value="VIP Customer">VIP Customer</option>
@@ -166,7 +171,9 @@ export const CustomerProfile = () => {
             <ShieldCheck className="w-4 h-4" />
             <span className="capitalize">{customer.status || 'Active'} Account</span>
           </div>
-          <div className="text-xs text-[#687163] mt-1">Verified customer profile</div>
+          <div className="text-xs text-[#687163] mt-1">
+            {customer.status === 'active' ? 'Verified customer profile' : 'Unverified / Pending Email'}
+          </div>
         </div>
       </div>
 
@@ -204,12 +211,17 @@ export const CustomerProfile = () => {
                           {order.orderNumber || order.id || order._id}
                         </span>
                         <span className="text-[10px] px-2 py-0.2 rounded font-mono uppercase bg-[#FAF8F5] border border-[#E8E4DC] text-[#687163]">
-                          {order.status || 'Pending'}
+                          {order.orderStatus || order.status || 'Pending'}
                         </span>
                       </div>
                       <div className="text-xs text-[#687163] mt-1">
                         {(order.items || []).map((i) => `${i.quantity || 1}x ${i.productName || i.name || 'Product'}`).join(', ')}
                       </div>
+                      {order.notes && (
+                        <div className="text-[11px] text-[#506040] bg-[#506040]/10 px-2 py-0.5 rounded mt-1.5 inline-block font-medium">
+                          Note: {order.notes}
+                        </div>
+                      )}
                     </div>
 
                     <div className="text-right">
@@ -241,18 +253,25 @@ export const CustomerProfile = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {customer.wishlist.map((item, idx) => (
                   <div
-                    key={idx}
-                    className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E8E4DC] flex items-center justify-between text-xs"
+                    key={item._id || item.id || idx}
+                    className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E8E4DC] flex items-center justify-between text-xs gap-3"
                   >
-                    <div>
-                      <div className="font-semibold text-[#1D241C]">{item.name}</div>
-                      {item.addedAt && (
-                        <div className="text-[10px] text-[#687163] mt-0.5">
-                          Added on {new Date(item.addedAt).toLocaleDateString()}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {item.images?.[0] ? (
+                        <img src={item.images[0]} alt={item.name} className="w-10 h-10 rounded-lg object-cover border border-[#E8E4DC] shrink-0" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-white border border-[#E8E4DC] flex items-center justify-center text-[#506040] shrink-0">
+                          <Heart className="w-4 h-4" />
                         </div>
                       )}
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[#1D241C] truncate">{item.name || 'Wishlist Item'}</div>
+                        <div className="text-[10px] text-[#687163] mt-0.5">
+                          {item.sku ? `SKU: ${item.sku}` : ''}
+                        </div>
+                      </div>
                     </div>
-                    <div className="font-mono-data font-bold text-[#1D241C]">
+                    <div className="font-mono-data font-bold text-[#1D241C] shrink-0">
                       ₹{Number(item.price || 0).toLocaleString('en-IN')}
                     </div>
                   </div>

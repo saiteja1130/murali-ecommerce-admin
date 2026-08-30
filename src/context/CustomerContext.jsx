@@ -46,9 +46,13 @@ export const CustomerProvider = ({ children }) => {
                     state: primaryAddr?.state || '',
                     country: primaryAddr?.country || '',
                     addresses: user.addresses || [],
+                    wishlist: user.wishlist || [],
                     role: user.role,
                     createdAt: user.createdAt,
                     status: user.isEmailVerified ? 'active' : 'pending',
+                    totalSpent: Number(user.totalSpent || 0),
+                    orderCount: Number(user.orderCount || 0),
+                    vipTier: user.totalSpent > 5000 ? 'VIP Customer' : user.totalSpent > 0 ? 'Regular Customer' : 'New Customer',
                 };
             });
 
@@ -85,6 +89,11 @@ export const CustomerProvider = ({ children }) => {
                 createdAt: user.createdAt,
                 status: user.isEmailVerified ? 'active' : 'pending',
                 addresses: user.addresses || [],
+                wishlist: user.wishlist || [],
+                orders: user.orders || [],
+                totalSpent: Number(user.totalSpent || 0),
+                orderCount: Number(user.orderCount || 0),
+                vipTier: user.totalSpent > 5000 ? 'VIP Customer' : user.totalSpent > 0 ? 'Regular Customer' : 'New Customer',
             };
         } catch (error) {
             console.error("Failed to fetch customer by ID:", error);

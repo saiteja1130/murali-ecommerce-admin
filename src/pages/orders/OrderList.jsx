@@ -199,7 +199,17 @@ export const OrderList = () => {
             })}
                     </td>
                     <td className="py-3.5 px-3">
-                      <div className="font-semibold text-[#1D241C]">{order.customer?.name || order.customerName || 'Customer'}</div>
+                      <div className="font-semibold text-[#1D241C] flex items-center gap-1.5">
+                        <span>{order.customer?.name || order.customerName || 'Customer'}</span>
+                        {order.notes && (
+                          <span
+                            className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-[#506040]/15 text-[#506040] font-bold"
+                            title={`Delivery Instructions: ${order.notes}`}
+                          >
+                            📝 Note
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[10px] text-[#687163]">{order.customer?.city || order.customer?.email || order.customerEmail || ''}</div>
                     </td>
                     <td className="py-3.5 px-3 text-[#687163] max-w-xs truncate">

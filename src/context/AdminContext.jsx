@@ -19,24 +19,24 @@ const defaultAdminContext = {
     isSidebarCollapsed: false,
     isCommandPaletteOpen: false,
     storeSettings: {},
-    showToast: () => {},
-    removeToast: () => {},
-    toggleSidebar: () => {},
-    setCommandPaletteOpen: () => {},
-    updateStoreSettings: () => {},
-    logActivity: () => {},
-    addProduct: () => {},
-    updateProduct: () => {},
-    removeProduct: () => {},
-    addOrder: () => {},
-    updateOrderStatus: () => {},
-    addReturn: () => {},
-    updateReturnStatus: () => {},
-    addPromotion: () => {},
-    updatePromotion: () => {},
-    removePromotion: () => {},
-    updateShopTheLook: () => {},
-    fetchCustomers: async () => {},
+    showToast: () => { },
+    removeToast: () => { },
+    toggleSidebar: () => { },
+    setCommandPaletteOpen: () => { },
+    updateStoreSettings: () => { },
+    logActivity: () => { },
+    addProduct: () => { },
+    updateProduct: () => { },
+    removeProduct: () => { },
+    addOrder: () => { },
+    updateOrderStatus: () => { },
+    addReturn: () => { },
+    updateReturnStatus: () => { },
+    addPromotion: () => { },
+    updatePromotion: () => { },
+    removePromotion: () => { },
+    updateShopTheLook: () => { },
+    fetchCustomers: async () => { },
 };
 
 const AdminContext = createContext(defaultAdminContext);
@@ -199,8 +199,10 @@ export const AdminProvider = ({ children }) => {
                             type: 'placed'
                         }
                     ],
+                    notes: o.notes || '',
                     internalNotes: o.notes ? [o.notes] : []
                 }));
+                liveOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 setOrders(liveOrders);
             }
         } catch (err) {

@@ -5,10 +5,10 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
     const { currentUser } = useAdmin();
     const location = useLocation();
     if (!currentUser) {
-        return <Navigate to="/login" state={{ from: location }} replace/>;
+        return <Navigate to="/login" state={{ from: location }} replace />;
     }
     if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
-        return <Navigate to="/admin" replace/>;
+        return <Navigate to="/admin" replace />;
     }
     return <>{children}</>;
 };

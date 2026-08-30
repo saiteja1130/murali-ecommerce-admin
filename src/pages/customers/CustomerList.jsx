@@ -27,9 +27,14 @@ export const CustomerList = () => {
   useEffect(() => {
     setPage(1);
   }, [searchQuery, sortBy]);
+
+  const filteredCustomers = (customers || []).filter(
+    (c) => tierFilter === 'all' || c.vipTier === tierFilter
+  );
+
   const handleExportCSV = () => {
     const headers = ['ID', 'Name', 'Email', 'Phone', 'City', 'Country', 'LTV Spent', 'Orders Count', 'Status'];
-    const rows = customers.map((c) => [
+    const rows = filteredCustomers.map((c) => [
       c.id,
       `"${c.name}"`,
       c.email || '',
@@ -141,11 +146,11 @@ export const CustomerList = () => {
                   </div>
                 </td>
               </tr>
-            ) : customers.length === 0 ? (<tr>
+            ) : filteredCustomers.length === 0 ? (<tr>
               <td colSpan={7} className="py-12 text-center text-[#6B6864]">
                 No customer profiles found matching criteria.
               </td>
-            </tr>) : (customers.map((cust) => (<tr key={cust.id} className="hover:bg-[#FAF8F5] transition-colors cursor-pointer" onClick={() => navigate(`/admin/customers/${cust.id}`)}>
+            </tr>) : (filteredCustomers.map((cust) => (<tr key={cust.id} className="hover:bg-[#FAF8F5] transition-colors cursor-pointer" onClick={() => navigate(`/admin/customers/${cust.id}`)}>
               <td className="py-3.5 px-4">
                 <div className="flex items-center gap-3">
                   {cust.avatar ? (

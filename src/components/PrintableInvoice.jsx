@@ -158,10 +158,6 @@ export const PrintableInvoice = ({ order, onClose }) => {
                   {Number(order.shippingCost !== undefined ? order.shippingCost : (order.shipping || 0)) === 0 ? 'Free' : `₹${Number(order.shippingCost !== undefined ? order.shippingCost : (order.shipping || 0)).toFixed(2)}`}
                 </span>
               </div>
-              <div className="flex justify-between text-[#6B6864]">
-                <span>Estimated Taxes / GST</span>
-                <span className="font-mono-data">₹0.00 (Inclusive)</span>
-              </div>
               <div className="border-t-2 border-[#1A1A1A] pt-2 flex justify-between font-bold text-sm text-[#1A1A1A]">
                 <span>Total Amount Paid</span>
                 <span className="font-mono-data">₹{Number(order.total || 0).toFixed(2)}</span>

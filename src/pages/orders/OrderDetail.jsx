@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Sparkles,
   ChevronRight,
+  Truck,
 } from 'lucide-react';
 
 export const OrderDetail = () => {
@@ -255,10 +256,6 @@ export const OrderDetail = () => {
                   {Number(order.shippingCost !== undefined ? order.shippingCost : (order.shipping || 0)) === 0 ? 'Free Delivery' : `₹${Number(order.shippingCost !== undefined ? order.shippingCost : (order.shipping || 0)).toFixed(2)}`}
                 </span>
               </div>
-              <div className="flex justify-between text-[#687163]">
-                <span>Estimated Taxes / GST</span>
-                <span className="font-mono">₹0.00 (Inclusive)</span>
-              </div>
               <div className="pt-2 border-t-2 border-[#1D241C] flex justify-between font-bold text-base text-[#1D241C]">
                 <span>Total Amount</span>
                 <span className="font-mono">₹{Number(order.total || 0).toFixed(2)}</span>
@@ -393,6 +390,34 @@ export const OrderDetail = () => {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Customer Delivery Instructions Card */}
+          <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-3">
+            <h3 className="font-serif text-base font-bold text-[#1D241C] border-b border-[#E8E4DC] pb-2 flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-[#506040]" />
+                <span>Delivery Instructions</span>
+              </span>
+              {order.notes ? (
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-[#506040]/15 text-[#506040] font-bold">
+                  Provided
+                </span>
+              ) : null}
+            </h3>
+
+            {order.notes ? (
+              <div className="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#E8E4DC] text-xs text-[#1D241C] leading-relaxed">
+                <div className="text-[10px] text-[#687163] uppercase font-bold tracking-wider mb-1">
+                  Customer Courier Note:
+                </div>
+                <p className="font-medium text-[#1D241C] whitespace-pre-wrap">{order.notes}</p>
+              </div>
+            ) : (
+              <div className="text-xs text-[#687163] italic py-1">
+                No special delivery instructions provided for this order.
+              </div>
+            )}
           </div>
 
           {/* Payment Method Card */}
