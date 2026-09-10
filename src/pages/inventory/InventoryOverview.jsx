@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAdmin } from '../../context/AdminContext';
 import { useCategory } from '../../context/CategoryContext';
 import { Package, AlertTriangle, Search, Download, RefreshCw, Layers } from 'lucide-react';
+import ConfirmModal from '../../components/ConfirmModal';
 
 export const InventoryOverview = () => {
   const { products, inventoryLogs, adjustStock, showToast } = useAdmin();
@@ -17,6 +18,7 @@ export const InventoryOverview = () => {
   const [adjustModalProduct, setAdjustModalProduct] = useState(null);
   const [adjustDelta, setAdjustDelta] = useState(5);
   const [adjustReason, setAdjustReason] = useState('Restock from supplier');
+  const [showConfirmAdjust, setShowConfirmAdjust] = useState(false);
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
@@ -36,7 +38,13 @@ export const InventoryOverview = () => {
   const handleExecuteAdjustment = (e) => {
     e.preventDefault();
     if (!adjustModalProduct) return;
+    setShowConfirmAdjust(true);
+  };
+
+  const handleConfirmedAdjustment = () => {
+    if (!adjustModalProduct) return;
     adjustStock(adjustModalProduct.productId, adjustDelta, adjustReason);
+    setShowConfirmAdjust(false);
     setAdjustModalProduct(null);
   };
 
@@ -415,6 +423,17 @@ export const InventoryOverview = () => {
           </form>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showConfirmAdjust}
+        onClose={() => setShowConfirmAdjust(false)}
+        onConfirm={handleConfirmedAdjustment}
+        variant={adjustDelta < 0 ? 'warning' : 'primary'}
+        title="Confirm Inventory Adjustment?"
+        message={`Are you sure you want to adjust inventory stock by ${adjustDelta > 0 ? '+' : ''}${adjustDelta} units for "${adjustModalProduct?.name}"? Reason: ${adjustReason}.`}
+        confirmText="Confirm Adjustment"
+        cancelText="Cancel"
+      />
     </div>
   );
 };

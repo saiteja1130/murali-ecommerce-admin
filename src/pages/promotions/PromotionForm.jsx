@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAdmin } from '../../context/AdminContext';
 import { ArrowLeft, Save } from 'lucide-react';
+import ConfirmModal from '../../components/ConfirmModal';
 
 export const PromotionForm = ({ mode }) => {
   const { id } = useParams();
@@ -18,6 +19,8 @@ export const PromotionForm = ({ mode }) => {
   const [endDate, setEndDate] = useState('2026-12-31');
   const [isActive, setIsActive] = useState(true);
   const [selectedCats, setSelectedCats] = useState(['All Categories']);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (mode === 'edit' && existingPromo) {
@@ -39,23 +42,37 @@ export const PromotionForm = ({ mode }) => {
       showToast('danger', 'Code Required', 'Please enter a coupon code.');
       return;
     }
-    const payload = {
-      code: code.toUpperCase().trim(),
-      discountType,
-      discountValue: Number(discountValue),
-      minSpend: minSpend ? Number(minSpend) : undefined,
-      usageLimit: usageLimit ? Number(usageLimit) : undefined,
-      startDate,
-      endDate,
-      isActive,
-      applicableCategories: selectedCats,
-    };
-    if (mode === 'edit' && id) {
-      updatePromotion(id, payload);
-    } else {
-      addPromotion(payload);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmedSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        code: code.toUpperCase().trim(),
+        discountType,
+        discountValue: Number(discountValue),
+        minSpend: minSpend ? Number(minSpend) : undefined,
+        usageLimit: usageLimit ? Number(usageLimit) : undefined,
+        startDate,
+        endDate,
+        isActive,
+        applicableCategories: selectedCats,
+      };
+      if (mode === 'edit' && id) {
+        await updatePromotion(id, payload);
+        showToast('success', 'Promotion Updated', `Coupon code "${payload.code}" successfully updated.`);
+      } else {
+        await addPromotion(payload);
+        showToast('success', 'Promotion Created', `Coupon code "${payload.code}" is now active.`);
+      }
+      setShowConfirmModal(false);
+      navigate('/admin/promotions');
+    } catch (err) {
+      showToast('danger', 'Error', 'Failed to save coupon code.');
+    } finally {
+      setIsSubmitting(false);
     }
-    navigate('/admin/promotions');
   };
 
   return (
@@ -200,6 +217,18 @@ export const PromotionForm = ({ mode }) => {
           </label>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => !isSubmitting && setShowConfirmModal(false)}
+        onConfirm={handleConfirmedSubmit}
+        isLoading={isSubmitting}
+        variant="primary"
+        title={mode === 'edit' ? 'Update Coupon Code?' : 'Create Promotion Code?'}
+        message={`Are you sure you want to save coupon "${code.trim().toUpperCase()}" with a ${discountValue}${discountType === 'percentage' ? '%' : ' INR'} discount?`}
+        confirmText={mode === 'edit' ? 'Save Changes' : 'Create Coupon'}
+        cancelText="Cancel"
+      />
     </form>
   );
 };

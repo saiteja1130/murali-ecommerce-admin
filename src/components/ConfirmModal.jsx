@@ -1,11 +1,11 @@
 import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
-export const ConfirmModal = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  title = "Confirm Deletion", 
+export const ConfirmModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title = "Confirm Deletion",
   message = "Are you sure you want to proceed? This action cannot be undone.",
   confirmText = "Delete",
   cancelText = "Cancel"
@@ -15,7 +15,7 @@ export const ConfirmModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="bg-white max-w-sm w-full p-6 rounded-2xl border border-[#E8E4DC] shadow-2xl space-y-4">
-        
+
         <div className="flex items-start justify-between">
           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 text-red-600 shrink-0">
             <AlertTriangle className="w-5 h-5" />

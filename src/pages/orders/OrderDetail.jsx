@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAdmin } from '../../context/AdminContext';
 import { PrintableInvoice } from '../../components/PrintableInvoice';
+import ConfirmModal from '../../components/ConfirmModal';
 import {
   ArrowLeft,
   Printer,
@@ -26,6 +27,7 @@ export const OrderDetail = () => {
   const [refundReason, setRefundReason] = useState('Customer requested return/refund');
   const [refundAmount, setRefundAmount] = useState(order ? order.total : 0);
   const [newNote, setNewNote] = useState('');
+  const [statusModal, setStatusModal] = useState({ isOpen: false, nextStatus: null, isLoading: false });
 
   if (!order) {
     return (
@@ -38,8 +40,26 @@ export const OrderDetail = () => {
     );
   }
 
-  const handleStatusChange = (newStatus) => {
-    updateOrderStatus(order.id, newStatus);
+  const handleInitiateStatusChange = (newStatus) => {
+    if (newStatus === order.status) return;
+    setStatusModal({ isOpen: true, nextStatus, isLoading: false });
+  };
+
+  const handleConfirmStatusChange = async () => {
+    if (!statusModal.nextStatus) return;
+    setStatusModal((prev) => ({ ...prev, isLoading: true }));
+    try {
+      await updateOrderStatus(order.id, statusModal.nextStatus);
+      showToast(
+        'success',
+        'Status Updated',
+        `Order marked as ${statusModal.nextStatus}. Automated email dispatched to customer.`
+      );
+      setStatusModal({ isOpen: false, nextStatus: null, isLoading: false });
+    } catch (err) {
+      showToast('danger', 'Error', 'Failed to update order status.');
+      setStatusModal((prev) => ({ ...prev, isLoading: false }));
+    }
   };
 
   const handleAddNote = (e) => {
@@ -129,7 +149,7 @@ export const OrderDetail = () => {
             <span className="text-xs font-semibold text-[#1D241C]">Change Status:</span>
             <select
               value={order.status}
-              onChange={(e) => handleStatusChange(e.target.value)}
+              onChange={(e) => handleInitiateStatusChange(e.target.value)}
               className="px-3 py-1.5 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-medium text-[#1D241C] focus:outline-none focus:border-[#C69E58] cursor-pointer"
             >
               <option value="pending">Pending Payment</option>
@@ -511,6 +531,19 @@ export const OrderDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Order Status Confirmation Modal */}
+      <ConfirmModal
+        isOpen={statusModal.isOpen}
+        onClose={() => !statusModal.isLoading && setStatusModal({ isOpen: false, nextStatus: null, isLoading: false })}
+        onConfirm={handleConfirmStatusChange}
+        isLoading={statusModal.isLoading}
+        variant={statusModal.nextStatus === 'cancelled' ? 'danger' : 'primary'}
+        title={`Update Status to "${(statusModal.nextStatus || '').toUpperCase()}"?`}
+        message={`Are you sure you want to mark Order #${order.orderNumber} as "${statusModal.nextStatus}"? An automated email notification will be dispatched to ${order.customer?.email || order.customerEmail || 'the customer'}.`}
+        confirmText={`Update to ${statusModal.nextStatus || 'Status'}`}
+        cancelText="Cancel"
+      />
     </div>
   );
 };

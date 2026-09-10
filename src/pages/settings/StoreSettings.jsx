@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAdmin } from '../../context/AdminContext';
 import api from '../../context/api';
 import { Truck, Save, Tag, Sparkles, Loader2 } from 'lucide-react';
+import ConfirmModal from '../../components/ConfirmModal';
 
 export const StoreSettings = () => {
   const { showToast } = useAdmin();
@@ -17,6 +18,7 @@ export const StoreSettings = () => {
   const [promoCode, setPromoCode] = useState('SUMI15');
   const [discountPercent, setDiscountPercent] = useState(15);
   const [isPromoActive, setIsPromoActive] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Fetch settings from Backend API on mount
   useEffect(() => {
@@ -42,8 +44,12 @@ export const StoreSettings = () => {
     loadSettings();
   }, []);
 
-  const handleSave = async (e) => {
+  const handleSave = (e) => {
     e.preventDefault();
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmedSave = async () => {
     setIsSaving(true);
     try {
       const payload = {
@@ -60,6 +66,7 @@ export const StoreSettings = () => {
       } else {
         showToast('success', 'Settings Updated', 'Configuration updated in system cache.');
       }
+      setShowConfirmModal(false);
     } catch (error) {
       console.error('Failed to update store settings:', error);
       showToast('danger', 'Save Failed', error.response?.data?.message || 'Could not save store settings to server.');
@@ -288,6 +295,18 @@ export const StoreSettings = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => !isSaving && setShowConfirmModal(false)}
+        onConfirm={handleConfirmedSave}
+        isLoading={isSaving}
+        variant="primary"
+        title="Apply Store Configuration?"
+        message="Are you sure you want to save and update the global store settings? Changes to shipping fees, free shipping thresholds, and promo discounts take effect immediately for customer checkout."
+        confirmText="Apply Settings"
+        cancelText="Cancel"
+      />
     </form>
   );
 };

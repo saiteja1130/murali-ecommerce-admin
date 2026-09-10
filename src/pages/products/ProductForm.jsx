@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useProduct } from '../../context/ProductContext';
 import { useCategory } from '../../context/CategoryContext';
 import { useAdmin } from '../../context/AdminContext';
+import ConfirmModal from '../../components/ConfirmModal';
 import {
   ArrowLeft,
   Save,
@@ -52,6 +53,7 @@ export const ProductForm = ({ mode }) => {
 
   const [isLoadingProduct, setIsLoadingProduct] = useState(mode === 'edit');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Filtered subcategories based on chosen Main Category
   const availableSubcategories = React.useMemo(() => {
@@ -206,8 +208,8 @@ export const ProductForm = ({ mode }) => {
     showToast('info', 'Primary Cover Updated', 'Main product photo updated.');
   };
 
-  // Submit form via FormData
-  const handleSubmit = async (e) => {
+  // Validate and initiate submission confirmation modal
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim() || !sku.trim()) {
       showToast('danger', 'Validation Incomplete', 'Product name and SKU are required.');
@@ -222,6 +224,11 @@ export const ProductForm = ({ mode }) => {
       return;
     }
 
+    setShowConfirmModal(true);
+  };
+
+  // Confirmed form execution via FormData
+  const handleConfirmedSubmit = async () => {
     setIsSubmitting(true);
     try {
       const formData = new FormData();
@@ -257,12 +264,16 @@ export const ProductForm = ({ mode }) => {
 
       if (mode === 'edit' && id) {
         await updateProduct(id, formData);
+        showToast('success', 'Product Updated', `Successfully updated "${name.trim()}".`);
       } else {
         await addProduct(formData);
+        showToast('success', 'Product Published', `"${name.trim()}" is now live in the catalog.`);
       }
+      setShowConfirmModal(false);
       navigate('/admin/products');
     } catch (err) {
       console.error('Submit error:', err);
+      showToast('danger', 'Submission Error', err.response?.data?.message || 'Failed to save product.');
     } finally {
       setIsSubmitting(false);
     }
@@ -840,6 +851,22 @@ export const ProductForm = ({ mode }) => {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => !isSubmitting && setShowConfirmModal(false)}
+        onConfirm={handleConfirmedSubmit}
+        isLoading={isSubmitting}
+        variant="primary"
+        title={mode === 'edit' ? 'Save Product Changes?' : 'Publish New Product?'}
+        message={
+          mode === 'edit'
+            ? `Are you sure you want to save changes to "${name || 'this product'}"? Pricing, stock, and details will update across the catalog.`
+            : `Are you sure you want to publish "${name || 'this product'}" to the active catalog? It will be visible and purchasable by customers.`
+        }
+        confirmText={mode === 'edit' ? 'Save Changes' : 'Publish Product'}
+        cancelText="Review Form"
+      />
     </form>
   );
 };

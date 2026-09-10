@@ -20,6 +20,7 @@ import {
   PackageX,
   Image as ImageIcon,
 } from 'lucide-react';
+import ConfirmModal from '../../components/ConfirmModal';
 
 export const ProductList = () => {
   const {
@@ -46,6 +47,11 @@ export const ProductList = () => {
 
   // Selected for bulk actions
   const [selectedIds, setSelectedIds] = useState([]);
+
+  // Confirmation Modal States
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, product: null, isLoading: false });
+  const [stockModal, setStockModal] = useState({ isOpen: false, product: null, isLoading: false });
+  const [bulkModal, setBulkModal] = useState({ isOpen: false, action: null, isLoading: false });
 
   // Debounced server-side fetching
   useEffect(() => {
@@ -108,8 +114,61 @@ export const ProductList = () => {
     else setSortBy('newest');
   };
 
-  const handleToggleStock = async (product) => {
-    await toggleStockAvailability(product.id, !product.isStockAvailable);
+  const handleOpenToggleStock = (product) => {
+    setStockModal({ isOpen: true, product, isLoading: false });
+  };
+
+  const handleConfirmToggleStock = async () => {
+    if (!stockModal.product) return;
+    setStockModal((prev) => ({ ...prev, isLoading: true }));
+    try {
+      await toggleStockAvailability(stockModal.product.id, !stockModal.product.isStockAvailable);
+      showToast('success', 'Stock Updated', `Updated stock status for "${stockModal.product.name}".`);
+      setStockModal({ isOpen: false, product: null, isLoading: false });
+    } catch (err) {
+      showToast('danger', 'Error', 'Failed to update product stock status.');
+      setStockModal((prev) => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleOpenDelete = (product) => {
+    setDeleteModal({ isOpen: true, product, isLoading: false });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.product) return;
+    setDeleteModal((prev) => ({ ...prev, isLoading: true }));
+    try {
+      await deleteProduct(deleteModal.product.id);
+      showToast('success', 'Product Deleted', `Permanently removed "${deleteModal.product.name}".`);
+      setDeleteModal({ isOpen: false, product: null, isLoading: false });
+    } catch (err) {
+      showToast('danger', 'Delete Failed', 'Could not delete product.');
+      setDeleteModal((prev) => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleOpenBulkAction = (action) => {
+    if (selectedIds.length === 0) return;
+    setBulkModal({ isOpen: true, action, isLoading: false });
+  };
+
+  const handleConfirmBulkAction = async () => {
+    if (!bulkModal.action || selectedIds.length === 0) return;
+    setBulkModal((prev) => ({ ...prev, isLoading: true }));
+    try {
+      await bulkUpdateStatus(selectedIds, bulkModal.action);
+      showToast(
+        'success',
+        'Bulk Update Complete',
+        `Successfully updated ${selectedIds.length} products.`
+      );
+      setSelectedIds([]);
+      setBulkModal({ isOpen: false, action: null, isLoading: false });
+    } catch (err) {
+      showToast('danger', 'Error', 'Failed to execute bulk update.');
+      setBulkModal((prev) => ({ ...prev, isLoading: false }));
+    }
   };
 
   return (
@@ -222,19 +281,13 @@ export const ProductList = () => {
                 </span>
                 <div className="h-3 w-px bg-[#E8E4DC]" />
                 <button
-                  onClick={() => {
-                    bulkUpdateStatus(selectedIds, 'in_stock');
-                    setSelectedIds([]);
-                  }}
+                  onClick={() => handleOpenBulkAction('in_stock')}
                   className="text-[#506040] hover:underline font-medium cursor-pointer"
                 >
                   Enable Stock
                 </button>
                 <button
-                  onClick={() => {
-                    bulkUpdateStatus(selectedIds, 'archived');
-                    setSelectedIds([]);
-                  }}
+                  onClick={() => handleOpenBulkAction('archived')}
                   className="text-red-700 hover:underline font-medium cursor-pointer"
                 >
                   Archive
@@ -399,7 +452,7 @@ export const ProductList = () => {
                       <td className="py-3 px-3 text-center">
                         <button
                           type="button"
-                          onClick={() => handleToggleStock(product)}
+                          onClick={() => handleOpenToggleStock(product)}
                           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition-colors shadow-2xs ${
                             product.isStockAvailable
                               ? 'bg-[#4A7A5E]/15 text-[#4A7A5E] hover:bg-[#4A7A5E]/25 border border-[#4A7A5E]/30'
@@ -432,7 +485,7 @@ export const ProductList = () => {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => deleteProduct(product.id)}
+                            onClick={() => handleOpenDelete(product)}
                             className="p-1.5 rounded-lg hover:bg-[#A5432F]/10 text-[#A5432F] transition-colors cursor-pointer"
                             title="Delete Product"
                           >
@@ -493,6 +546,53 @@ export const ProductList = () => {
           </div>
         </div>
       </div>
+
+      {/* Delete Product Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => !deleteModal.isLoading && setDeleteModal({ isOpen: false, product: null, isLoading: false })}
+        onConfirm={handleConfirmDelete}
+        isLoading={deleteModal.isLoading}
+        variant="danger"
+        title="Delete Product?"
+        message={`Are you sure you want to permanently delete "${deleteModal.product?.name || 'this product'}"? This action cannot be reversed.`}
+        confirmText="Delete Product"
+        cancelText="Cancel"
+      />
+
+      {/* Toggle Stock Status Confirmation Modal */}
+      <ConfirmModal
+        isOpen={stockModal.isOpen}
+        onClose={() => !stockModal.isLoading && setStockModal({ isOpen: false, product: null, isLoading: false })}
+        onConfirm={handleConfirmToggleStock}
+        isLoading={stockModal.isLoading}
+        variant="warning"
+        title={stockModal.product?.isStockAvailable ? 'Mark as Out of Stock?' : 'Mark as In Stock?'}
+        message={
+          stockModal.product?.isStockAvailable
+            ? `Mark "${stockModal.product?.name}" as Out of Stock? Customers will no longer be able to add this product to their cart.`
+            : `Mark "${stockModal.product?.name}" as In Stock? Customers will be able to purchase this product immediately.`
+        }
+        confirmText={stockModal.product?.isStockAvailable ? 'Mark Out of Stock' : 'Mark In Stock'}
+        cancelText="Cancel"
+      />
+
+      {/* Bulk Action Confirmation Modal */}
+      <ConfirmModal
+        isOpen={bulkModal.isOpen}
+        onClose={() => !bulkModal.isLoading && setBulkModal({ isOpen: false, action: null, isLoading: false })}
+        onConfirm={handleConfirmBulkAction}
+        isLoading={bulkModal.isLoading}
+        variant={bulkModal.action === 'archived' ? 'danger' : 'primary'}
+        title={bulkModal.action === 'archived' ? 'Archive Selected Products?' : 'Enable Stock for Selected?'}
+        message={
+          bulkModal.action === 'archived'
+            ? `Are you sure you want to archive ${selectedIds.length} selected products? They will be hidden from the active catalog.`
+            : `Are you sure you want to set stock to available for ${selectedIds.length} selected products?`
+        }
+        confirmText={bulkModal.action === 'archived' ? 'Archive Products' : 'Enable Stock'}
+        cancelText="Cancel"
+      />
     </div>
   );
 };

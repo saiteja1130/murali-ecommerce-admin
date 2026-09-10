@@ -2,17 +2,36 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAdmin } from '../../context/AdminContext';
 import { Plus, Edit2, Trash2, Calendar } from 'lucide-react';
+import ConfirmModal from '../../components/ConfirmModal';
 
 export const PromotionList = () => {
   const { promotions, deletePromotion, showToast } = useAdmin();
   const navigate = useNavigate();
   const [filterType, setFilterType] = useState('all');
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, promo: null, isLoading: false });
 
   const filteredPromos = promotions.filter((p) => {
     if (filterType === 'active') return p.isActive;
     if (filterType === 'expired') return !p.isActive;
     return true;
   });
+
+  const handleOpenDelete = (promo) => {
+    setDeleteModal({ isOpen: true, promo, isLoading: false });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.promo) return;
+    setDeleteModal((prev) => ({ ...prev, isLoading: true }));
+    try {
+      await deletePromotion(deleteModal.promo.id);
+      showToast('success', 'Coupon Deleted', `Coupon code "${deleteModal.promo.code}" was removed.`);
+      setDeleteModal({ isOpen: false, promo: null, isLoading: false });
+    } catch (err) {
+      showToast('danger', 'Error', 'Failed to delete coupon.');
+      setDeleteModal((prev) => ({ ...prev, isLoading: false }));
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -117,7 +136,7 @@ export const PromotionList = () => {
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => deletePromotion(promo.id)}
+                  onClick={() => handleOpenDelete(promo)}
                   className="p-1.5 rounded-lg hover:bg-red-50 text-red-700 cursor-pointer"
                   title="Delete coupon"
                 >
@@ -128,6 +147,19 @@ export const PromotionList = () => {
           </div>
         ))}
       </div>
+
+      {/* Delete Coupon Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => !deleteModal.isLoading && setDeleteModal({ isOpen: false, promo: null, isLoading: false })}
+        onConfirm={handleConfirmDelete}
+        isLoading={deleteModal.isLoading}
+        variant="danger"
+        title="Delete Coupon Code?"
+        message={`Are you sure you want to delete coupon code "${deleteModal.promo?.code}"? Customers will no longer be able to use this promotional discount.`}
+        confirmText="Delete Coupon"
+        cancelText="Cancel"
+      />
     </div>
   );
 };
