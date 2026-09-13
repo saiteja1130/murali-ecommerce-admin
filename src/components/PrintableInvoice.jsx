@@ -31,22 +31,14 @@ export const PrintableInvoice = ({ order, onClose }) => {
         <div id="printable-document" className="p-8 sm:p-12 text-[#1A1A1A] bg-white font-sans">
           {/* Header */}
           <div className="flex items-start justify-between border-b-2 border-[#1D241C] pb-6 mb-8">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-1">
               <img
-                src="/assets/images/Logo.png"
+                src="/assets/images/Logo2.png"
                 alt="Murari's Glam & Glow"
-                className="h-16 w-auto object-contain"
+                className="h-14 w-auto max-w-[240px] object-contain"
               />
-              <div>
-                <div className="font-serif text-2xl font-bold tracking-[0.14em] text-[#1D241C]">
-                  MURARI'S
-                </div>
-                <div className="text-[9.5px] uppercase tracking-[0.25em] text-[#C69E58] font-bold">
-                  Glam & Glow • Atelier Operations
-                </div>
-                <div className="text-xs text-[#687163] mt-1 space-y-0.5">
-                  <div>concierge@murarisglamandglow.com</div>
-                </div>
+              <div className="text-[11px] text-[#687163] mt-1">
+                concierge@murarisglamandglow.com
               </div>
             </div>
             <div className="text-right">
@@ -148,7 +140,7 @@ export const PrintableInvoice = ({ order, onClose }) => {
               </div>
               {Number(order.discount || 0) > 0 && (
                 <div className="flex justify-between text-[#4A7A5E]">
-                  <span>VIP Courtesy Savings</span>
+                  <span>VIP Courtesy Savings {order.promoCode ? `(${order.promoCode})` : ''}</span>
                   <span className="font-mono-data">-₹{Number(order.discount).toFixed(2)}</span>
                 </div>
               )}

@@ -13,6 +13,7 @@ export const HeroCarouselEditor = () => {
   const [ctaText, setCtaText] = useState('Shop Collection');
   const [ctaLink, setCtaLink] = useState('/products');
   const [image, setImage] = useState('');
+  const [imageFile, setImageFile] = useState(null);
   const [imageSourceMode, setImageSourceMode] = useState('upload'); // 'upload' | 'url'
   const [isActive, setIsActive] = useState(true);
   const fileInputRef = useRef(null);
@@ -23,6 +24,7 @@ export const HeroCarouselEditor = () => {
     setCtaText('Shop Collection');
     setCtaLink('/products');
     setImage('');
+    setImageFile(null);
     setImageSourceMode('upload');
     setIsActive(true);
     setEditingId(null);
@@ -36,7 +38,8 @@ export const HeroCarouselEditor = () => {
     setCtaText(slide.ctaText);
     setCtaLink(slide.ctaLink);
     setImage(slide.image);
-    setImageSourceMode(slide.image?.startsWith('data:') ? 'upload' : 'url');
+    setImageFile(null);
+    setImageSourceMode('upload');
     setIsActive(slide.isActive);
     setIsModalOpen(true);
   };
@@ -45,43 +48,43 @@ export const HeroCarouselEditor = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      showToast('warning', 'File Size Exceeded', 'Please choose an image under 10MB.');
+    if (file.size > 15 * 1024 * 1024) {
+      showToast('warning', 'File Size Exceeded', 'Please choose an image under 15MB.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImage(reader.result);
-    };
-    reader.readAsDataURL(file);
+    setImageFile(file);
+    setImage(URL.createObjectURL(file));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim() || !image.trim()) return;
+    if (!title.trim() || (!image.trim() && !imageFile)) return;
 
-    if (editingId) {
-      updateHeroSlide(editingId, {
-        title,
-        subtitle,
-        ctaText,
-        ctaLink,
-        image,
-        isActive,
-      });
-    } else {
-      addHeroSlide({
-        title,
-        subtitle,
-        ctaText,
-        ctaLink,
-        image,
-        isActive,
-        order: heroSlides.length + 1,
-      });
+    const formData = new FormData();
+    formData.append('title', title.trim());
+    formData.append('subtitle', subtitle.trim());
+    formData.append('ctaText', ctaText.trim());
+    formData.append('ctaLink', ctaLink.trim());
+    formData.append('isActive', isActive);
+
+    if (imageFile) {
+      formData.append('image', imageFile);
+    } else if (image) {
+      formData.append('image', image);
     }
-    resetForm();
+
+    let success = false;
+    if (editingId) {
+      success = await updateHeroSlide(editingId, formData);
+    } else {
+      formData.append('order', heroSlides.length + 1);
+      success = await addHeroSlide(formData);
+    }
+
+    if (success) {
+      resetForm();
+    }
   };
 
   const handleMove = (index, direction) => {
@@ -302,6 +305,7 @@ export const HeroCarouselEditor = () => {
                             fileInputRef.current?.click();
                           } else {
                             setImage('');
+                            setImageFile(null);
                           }
                         }}
                         className="px-3 py-1.5 bg-white/90 hover:bg-white text-[#1D241C] rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
@@ -311,7 +315,10 @@ export const HeroCarouselEditor = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setImage('')}
+                        onClick={() => {
+                          setImage('');
+                          setImageFile(null);
+                        }}
                         className="p-1.5 bg-red-600 text-white rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
                         title="Remove Image"
                       >

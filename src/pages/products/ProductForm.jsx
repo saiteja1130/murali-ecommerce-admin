@@ -48,6 +48,10 @@ export const ProductForm = ({ mode }) => {
   const [images, setImages] = useState([]);
   const [newImageUrl, setNewImageUrl] = useState('');
 
+  // Sizes state (for all / non-variant products)
+  const [sizes, setSizes] = useState([]);
+  const [customSizeInput, setCustomSizeInput] = useState('');
+
   // Variants state (empty by default)
   const [variants, setVariants] = useState([]);
 
@@ -109,6 +113,10 @@ export const ProductForm = ({ mode }) => {
               setImages(p.images.map((imgUrl, i) => ({ id: `existing-${i}`, url: imgUrl })));
             }
 
+            if (p.sizes && Array.isArray(p.sizes)) {
+              setSizes(p.sizes);
+            }
+
             if (p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
               setVariants(p.variants.map((v, i) => ({
                 id: v._id || `var-${i}`,
@@ -116,7 +124,7 @@ export const ProductForm = ({ mode }) => {
                 color: v.color || '',
                 colorHex: v.colorHex || '#1A1A1A',
                 size: v.size || '',
-                stock: v.stock || 0,
+                stock: v.stock !== undefined ? v.stock : 1,
                 price: v.price || p.price || 0,
               })));
             }
@@ -153,6 +161,29 @@ export const ProductForm = ({ mode }) => {
     }
   };
 
+  const STANDARD_SIZE_PRESETS = ['Free Size', 'One Size', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+
+  const handleTogglePresetSize = (sz) => {
+    if (sizes.includes(sz)) {
+      setSizes(sizes.filter((s) => s !== sz));
+    } else {
+      setSizes([...sizes, sz]);
+    }
+  };
+
+  const handleAddCustomSize = (e) => {
+    if (e) e.preventDefault();
+    const trimmed = customSizeInput.trim();
+    if (trimmed && !sizes.includes(trimmed)) {
+      setSizes([...sizes, trimmed]);
+      setCustomSizeInput('');
+    }
+  };
+
+  const handleRemoveSize = (szToRemove) => {
+    setSizes(sizes.filter((s) => s !== szToRemove));
+  };
+
   // Add variant helper
   const handleAddVariant = () => {
     const newV = {
@@ -160,8 +191,8 @@ export const ProductForm = ({ mode }) => {
       sku: sku ? `${sku}-${variants.length + 1}` : `SKU-${variants.length + 1}`,
       color: '',
       colorHex: '#1A1A1A',
-      size: '',
-      stock: 0,
+      size: sizes.length > 0 ? sizes[0] : '',
+      stock: 1,
       price: price ? Number(price) : 0,
     };
     setVariants([...variants, newV]);
@@ -249,6 +280,7 @@ export const ProductForm = ({ mode }) => {
       formData.append('sustainability', sustainability);
       formData.append('careInstructions', careInstructions);
       formData.append('dimensions', dimensions);
+      formData.append('sizes', JSON.stringify(sizes));
       formData.append('variants', JSON.stringify(variants));
 
       // Existing image URLs to retain
@@ -489,16 +521,108 @@ export const ProductForm = ({ mode }) => {
             </div>
           </div>
 
+          {/* Product Sizes (For Non-Variant or General Products) */}
+          <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E8E4DC] pb-3">
+              <div>
+                <h2 className="font-serif text-lg font-bold text-[#1D241C] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#C69E58]" />
+                  <span>Available Product Sizes</span>
+                </h2>
+                <p className="text-xs text-[#687163] mt-0.5">
+                  Select available sizes for customers to choose from (works for single products and variant collections).
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Size Presets */}
+            <div>
+              <label className="block text-[11px] font-semibold text-[#1D241C] uppercase tracking-wider mb-2">
+                Quick Select Sizes:
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {STANDARD_SIZE_PRESETS.map((preset) => {
+                  const isSelected = sizes.includes(preset);
+                  return (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => handleTogglePresetSize(preset)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                        isSelected
+                          ? 'bg-[#1D241C] text-white border-[#1D241C] shadow-xs'
+                          : 'bg-[#FAF8F5] text-[#1D241C] border-[#E8E4DC] hover:border-[#C69E58]'
+                      }`}
+                    >
+                      {isSelected ? `✓ ${preset}` : `+ ${preset}`}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom Size Input */}
+            <div className="flex gap-2 pt-2">
+              <input
+                type="text"
+                value={customSizeInput}
+                onChange={(e) => setCustomSizeInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddCustomSize();
+                  }
+                }}
+                placeholder="Or type custom size (e.g. 28, 30, UK 7, Combo Pack)..."
+                className="flex-1 px-3.5 py-2 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs text-[#1D241C] focus:outline-none focus:border-[#C69E58]"
+              />
+              <button
+                type="button"
+                onClick={handleAddCustomSize}
+                className="px-4 py-2 bg-[#FAF8F5] hover:bg-[#F2EFE9] border border-[#E8E4DC] text-[#1D241C] text-xs font-semibold rounded-xl transition-colors shrink-0 cursor-pointer"
+              >
+                Add Custom Size
+              </button>
+            </div>
+
+            {/* Selected Sizes Display */}
+            {sizes.length > 0 && (
+              <div className="pt-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#506040] block mb-2">
+                  Active Sizes on Storefront ({sizes.length}):
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {sizes.map((sz) => (
+                    <span
+                      key={sz}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#506040]/10 border border-[#506040]/25 text-[#506040] rounded-lg text-xs font-semibold"
+                    >
+                      <span>{sz}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSize(sz)}
+                        className="hover:text-red-700 cursor-pointer font-bold ml-1"
+                        title={`Remove size ${sz}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Color & Size Variant Matrix */}
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
             <div className="flex items-center justify-between border-b border-[#E8E4DC] pb-3">
               <div>
                 <h2 className="font-serif text-lg font-bold text-[#1D241C] flex items-center gap-2">
                   <Layers className="w-4 h-4 text-[#C69E58]" />
-                  <span>Product Variants (Colors & Sizes)</span>
+                  <span>Color Variants (Optional)</span>
                 </h2>
                 <p className="text-xs text-[#687163] mt-0.5">
-                  Optional: Add colors, sizes, and stock per variant.
+                  Optional: Add colorways and specific sizes.
                 </p>
               </div>
               <button
@@ -515,9 +639,9 @@ export const ProductForm = ({ mode }) => {
               {variants.length === 0 ? (
                 <div className="p-6 text-center border-2 border-dashed border-[#E8E4DC] rounded-xl bg-[#FAF8F5]/50">
                   <Layers className="w-8 h-8 text-[#506040]/50 mx-auto mb-2" />
-                  <p className="text-xs font-semibold text-[#1D241C]">No variants added yet</p>
+                  <p className="text-xs font-semibold text-[#1D241C]">No color variants added</p>
                   <p className="text-[11px] text-[#687163] mt-0.5 mb-3">
-                    If your item has multiple colors or sizes, you can add them here.
+                    If this product comes in different colors, you can configure them here.
                   </p>
                   <button
                     type="button"
@@ -525,7 +649,7 @@ export const ProductForm = ({ mode }) => {
                     className="px-3.5 py-1.5 bg-[#1D241C] hover:bg-[#C69E58] text-white hover:text-[#1D241C] text-xs font-semibold rounded-xl transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>Add First Variant</span>
+                    <span>Add Color Variant</span>
                   </button>
                 </div>
               ) : (
@@ -561,7 +685,7 @@ export const ProductForm = ({ mode }) => {
                       />
                     </div>
 
-                    <div className="w-24">
+                    <div className="w-28">
                       <label className="text-[10px] uppercase font-mono text-[#687163]">Size</label>
                       <input
                         type="text"
@@ -572,24 +696,14 @@ export const ProductForm = ({ mode }) => {
                       />
                     </div>
 
-                    <div className="w-20">
-                      <label className="text-[10px] uppercase font-mono text-[#687163]">Stock</label>
-                      <input
-                        type="number"
-                        min={0}
-                        value={v.stock}
-                        onChange={(e) => handleUpdateVariant(idx, { stock: Number(e.target.value) })}
-                        className="w-full bg-white px-2 py-1 rounded border border-[#E8E4DC] text-xs font-mono font-bold"
-                      />
-                    </div>
-
-                    <div className="w-24">
-                      <label className="text-[10px] uppercase font-mono text-[#687163]">Price (₹)</label>
+                    <div className="w-28">
+                      <label className="text-[10px] uppercase font-mono text-[#687163]">Price (₹ optional)</label>
                       <input
                         type="number"
                         min={0}
                         value={v.price}
                         onChange={(e) => handleUpdateVariant(idx, { price: Number(e.target.value) })}
+                        placeholder="Default"
                         className="w-full bg-white px-2 py-1 rounded border border-[#E8E4DC] text-xs font-mono"
                       />
                     </div>

@@ -90,27 +90,19 @@ export const Sidebar = () => {
       {/* Brand Header */}
       <div className="h-20 px-4 border-b border-[#E8E4DC] flex items-center justify-between shrink-0">
         {!isSidebarCollapsed ? (
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 pr-1">
             <img
-              src="/assets/images/Logo.png"
+              src="/assets/images/Logo2.png"
               alt="Murari's Glam & Glow"
-              className="h-11 w-auto object-contain shrink-0"
+              className="h-12 w-auto max-w-[195px] object-contain shrink-0"
             />
-            <div className="min-w-0">
-              <div className="font-serif text-lg tracking-[0.12em] font-bold text-[#1D241C] leading-tight truncate">
-                MURARI'S
-              </div>
-              <div className="text-[8.5px] uppercase tracking-[0.2em] text-[#C69E58] font-semibold truncate">
-                GLAM & GLOW • ADMIN
-              </div>
-            </div>
           </div>
         ) : (
           <div className="mx-auto flex items-center justify-center">
             <img
-              src="/assets/images/Logo.png"
+              src="/assets/images/Favicon.png"
               alt="Murari's Glam & Glow"
-              className="h-9 w-auto object-contain"
+              className="h-8 w-8 object-contain"
               title="Murari's Glam & Glow"
             />
           </div>

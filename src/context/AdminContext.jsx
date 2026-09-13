@@ -107,6 +107,7 @@ export const AdminProvider = ({ children }) => {
                     total: Number(o.total || 0),
                     subtotal: Number(o.subtotal !== undefined ? o.subtotal : (o.total || 0)),
                     discount: Number(o.discount || 0),
+                    promoCode: o.promoCode || '',
                     shippingCost: Number(o.shippingCost || 0),
                     createdAt: o.createdAt || new Date().toISOString(),
                     customer: o.user ? {

@@ -48,7 +48,10 @@ export const HeroProvider = ({ children }) => {
 
     const addHeroSlide = async (slideData) => {
         try {
-            const response = await api.post('/api/hero', slideData);
+            const isFormData = slideData instanceof FormData;
+            const response = await api.post('/api/hero', slideData, isFormData ? {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            } : undefined);
             const slide = response.data.data;
             const newSlide = {
                 id: slide._id,
@@ -62,15 +65,21 @@ export const HeroProvider = ({ children }) => {
             };
             setHeroSlides(prev => [...prev, newSlide]);
             showToast('success', 'Hero Slide Added', 'New editorial banner added.');
+            return true;
         } catch (error) {
             console.error('Failed to add hero slide:', error);
-            showToast('danger', 'Error', 'Failed to add hero slide.');
+            const errorMsg = error.response?.data?.message || 'Failed to add hero slide.';
+            showToast('danger', 'Error', errorMsg);
+            return false;
         }
     };
 
     const updateHeroSlide = async (id, updates) => {
         try {
-            const response = await api.put(`/api/hero/${id}`, updates);
+            const isFormData = updates instanceof FormData;
+            const response = await api.put(`/api/hero/${id}`, updates, isFormData ? {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            } : undefined);
             const slide = response.data.data;
             setHeroSlides(prev => prev.map(s => s.id === id ? {
                 ...s,
@@ -83,9 +92,12 @@ export const HeroProvider = ({ children }) => {
                 order: slide.order
             } : s));
             showToast('success', 'Hero Carousel Updated', 'Editorial slide saved.');
+            return true;
         } catch (error) {
             console.error('Failed to update hero slide:', error);
-            showToast('danger', 'Error', 'Failed to update hero slide.');
+            const errorMsg = error.response?.data?.message || 'Failed to update hero slide.';
+            showToast('danger', 'Error', errorMsg);
+            return false;
         }
     };
 

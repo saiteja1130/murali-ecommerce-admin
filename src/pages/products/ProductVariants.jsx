@@ -81,14 +81,14 @@ export const ProductVariants = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
-                Variant & Inventory Matrix
+                Product Variant Matrix
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] uppercase font-mono tracking-widest bg-[#C8A87C]/15 text-[#A68758] font-bold">
                 {product.name}
               </span>
             </div>
             <p className="text-xs text-[#6B6864] mt-0.5">
-              Master SKU: <span className="font-mono text-[#1A1A1A]">{product.sku}</span> • Total Allocated Stock: <span className="font-mono font-bold text-[#1A1A1A]">{totalStock} units</span>
+              Master SKU: <span className="font-mono text-[#1A1A1A]">{product.sku}</span> • Active Combinations: <span className="font-mono font-bold text-[#1A1A1A]">{variants.length}</span>
             </p>
           </div>
         </div>
@@ -96,7 +96,7 @@ export const ProductVariants = () => {
         <div className="flex items-center gap-3">
           <button onClick={handleSaveAll} disabled={!hasChanges} className="px-5 py-2 bg-[#1A1A1A] hover:bg-[#333333] disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 shadow-sm cursor-pointer">
             <Save className="w-4 h-4 text-[#C8A87C]"/>
-            <span>Commit Inventory Matrix</span>
+            <span>Commit Variant Matrix</span>
           </button>
         </div>
       </div>
@@ -129,51 +129,27 @@ export const ProductVariants = () => {
               <th className="py-3.5 px-4 font-semibold">SKU Identifier</th>
               <th className="py-3.5 px-3 font-semibold">Colorway</th>
               <th className="py-3.5 px-3 font-semibold">Size</th>
-              <th className="py-3.5 px-3 font-semibold">Unit Price</th>
-              <th className="py-3.5 px-3 font-semibold">Available Units</th>
-              <th className="py-3.5 px-4 font-semibold text-right">Quick Adjust</th>
+              <th className="py-3.5 px-3 font-semibold">Unit Price (₹)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#F2EFE9] text-xs">
-            {variants.map((v, idx) => (<tr key={v.id} className="hover:bg-[#FAF8F5] transition-colors">
+            {variants.map((v, idx) => (<tr key={v.id || idx} className="hover:bg-[#FAF8F5] transition-colors">
                 <td className="py-3.5 px-4 font-mono font-semibold text-[#1A1A1A]">
                   {v.sku}
                 </td>
                 <td className="py-3.5 px-3">
                   <div className="flex items-center gap-2">
                     <span className="w-3.5 h-3.5 rounded-full border border-black/15 shrink-0" style={{ backgroundColor: v.colorHex }}/>
-                    <span className="font-medium text-[#1A1A1A]">{v.color}</span>
+                    <span className="font-medium text-[#1A1A1A]">{v.color || 'Standard'}</span>
                   </div>
                 </td>
                 <td className="py-3.5 px-3 font-medium text-[#6B6864]">
-                  {v.size}
+                  {v.size || 'Standard'}
                 </td>
                 <td className="py-3.5 px-3">
                   <div className="flex items-center gap-1 font-mono">
                     <span className="text-[#6B6864]">₹</span>
-                    <input type="number" value={v.price} onChange={(e) => handlePriceChange(idx, Number(e.target.value))} className="w-24 px-2 py-1 bg-[#F8F6F3] border border-[#E8E4DC] rounded-lg text-xs font-mono font-semibold text-[#1A1A1A]"/>
-                  </div>
-                </td>
-                <td className="py-3.5 px-3">
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-bold ${v.stock <= 2
-                ? 'bg-[#A5432F]/15 text-[#A5432F]'
-                : v.stock <= 4
-                    ? 'bg-[#B8863F]/15 text-[#B8863F]'
-                    : 'bg-[#4A7A5E]/15 text-[#4A7A5E]'}`}>
-                    {v.stock} units
-                  </span>
-                </td>
-                <td className="py-3.5 px-4 text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <button type="button" onClick={() => handleStockChange(idx, -1)} className="w-7 h-7 rounded-lg bg-[#FAF8F5] border border-[#E8E4DC] hover:bg-[#F2EFE9] text-[#1A1A1A] font-bold text-xs flex items-center justify-center transition-colors" title="Decrease stock by 1">
-                      -1
-                    </button>
-                    <button type="button" onClick={() => handleStockChange(idx, +1)} className="w-7 h-7 rounded-lg bg-[#FAF8F5] border border-[#E8E4DC] hover:bg-[#F2EFE9] text-[#1A1A1A] font-bold text-xs flex items-center justify-center transition-colors" title="Increase stock by 1">
-                      +1
-                    </button>
-                    <button type="button" onClick={() => handleStockChange(idx, +5)} className="px-2 h-7 rounded-lg bg-[#1A1A1A] text-[#C8A87C] font-mono text-[11px] font-semibold flex items-center justify-center hover:bg-[#333333] transition-colors" title="Restock batch of 5">
-                      +5 Restock
-                    </button>
+                    <input type="number" value={v.price} onChange={(e) => handlePriceChange(idx, Number(e.target.value))} className="w-28 px-2 py-1 bg-[#F8F6F3] border border-[#E8E4DC] rounded-lg text-xs font-mono font-semibold text-[#1A1A1A]"/>
                   </div>
                 </td>
               </tr>))}

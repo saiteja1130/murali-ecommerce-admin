@@ -43,18 +43,15 @@ export const AdminLogin = () => {
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#506040]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center relative z-10 space-y-2">
-        <div className="inline-flex p-3 rounded-2xl bg-white border border-[#E8E4DC] shadow-md mb-2">
+        <div className="inline-flex p-4 rounded-2xl bg-white border border-[#E8E4DC] shadow-md mb-2">
           <img
-            src="/assets/images/Logo.png"
+            src="/assets/images/Logo2.png"
             alt="Murari's Glam & Glow"
-            className="h-16 w-auto object-contain mx-auto"
+            className="h-16 w-auto max-w-[280px] object-contain mx-auto"
           />
         </div>
-        <h1 className="font-serif text-3xl font-bold tracking-[0.14em] text-[#1D241C]">
-          MURARI'S
-        </h1>
         <p className="text-xs uppercase tracking-[0.25em] text-[#C69E58] font-semibold">
-          Glam & Glow • Administration Suite
+          Administration Suite
         </p>
       </div>
 

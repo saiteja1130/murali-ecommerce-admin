@@ -42,7 +42,7 @@ export const OrderDetail = () => {
 
   const handleInitiateStatusChange = (newStatus) => {
     if (newStatus === order.status) return;
-    setStatusModal({ isOpen: true, nextStatus, isLoading: false });
+    setStatusModal({ isOpen: true, nextStatus: newStatus, isLoading: false });
   };
 
   const handleConfirmStatusChange = async () => {
@@ -265,7 +265,7 @@ export const OrderDetail = () => {
               </div>
               {Number(order.discount || 0) > 0 && (
                 <div className="flex justify-between text-[#506040]">
-                  <span>Discount</span>
+                  <span>Discount {order.promoCode ? `(${order.promoCode})` : ''}</span>
                   <span className="font-mono">-₹{Number(order.discount).toFixed(2)}</span>
                 </div>
               )}
