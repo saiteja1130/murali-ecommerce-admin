@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { INITIAL_ADMIN_USERS, INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_RETURNS, INITIAL_INVENTORY_LOGS, INITIAL_PROMOTIONS, INITIAL_SHOP_THE_LOOK_SCENE, INITIAL_NOTIFICATIONS, INITIAL_ACTIVITY_LOGS } from '../data/mockData';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from './api';
 
 const defaultAdminContext = {
@@ -19,76 +18,43 @@ const defaultAdminContext = {
     isSidebarCollapsed: false,
     isCommandPaletteOpen: false,
     storeSettings: {},
-    showToast: () => {},
-    removeToast: () => {},
-    toggleSidebar: () => {},
-    setCommandPaletteOpen: () => {},
-    updateStoreSettings: () => {},
-    logActivity: () => {},
-    addProduct: () => {},
-    updateProduct: () => {},
-    removeProduct: () => {},
-    addOrder: () => {},
-    updateOrderStatus: () => {},
-    addReturn: () => {},
-    updateReturnStatus: () => {},
-    addPromotion: () => {},
-    updatePromotion: () => {},
-    removePromotion: () => {},
-    updateShopTheLook: () => {},
-    fetchCustomers: async () => {},
+    showToast: () => { },
+    removeToast: () => { },
+    toggleSidebar: () => { },
+    setCommandPaletteOpen: () => { },
+    updateStoreSettings: () => { },
+    logActivity: () => { },
+    addProduct: () => { },
+    updateProduct: () => { },
+    removeProduct: () => { },
+    addOrder: () => { },
+    updateOrderStatus: () => { },
+    addReturn: () => { },
+    updateReturnStatus: () => { },
+    addPromotion: () => { },
+    updatePromotion: () => { },
+    removePromotion: () => { },
+    updateShopTheLook: () => { },
+    fetchCustomers: async () => { },
 };
 
 const AdminContext = createContext(defaultAdminContext);
-// Normalizers for mock data
-const normalizedPromotions = INITIAL_PROMOTIONS.map((p) => ({
-    ...p,
-    discountType: p.type || 'percentage',
-    discountValue: p.value || 15,
-    isActive: p.status === 'active',
-}));
 
-const normalizedShopTheLook = {
-    ...INITIAL_SHOP_THE_LOOK_SCENE,
-    image: INITIAL_SHOP_THE_LOOK_SCENE.imageUrl || 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1200&auto=format&fit=crop',
-    hotspots: (INITIAL_SHOP_THE_LOOK_SCENE.pins || []).map((p) => ({
-        id: p.id,
-        x: p.xPercent || 50,
-        y: p.yPercent || 50,
-        productId: p.productId,
-        productName: p.productName,
-        price: p.price,
-        label: p.label,
-    })),
-};
-const normalizedInventoryLogs = INITIAL_INVENTORY_LOGS.map((inv) => ({
-    ...inv,
-    createdAt: inv.timestamp || new Date().toISOString(),
-    performedBy: inv.actor || 'Eleonora Vance',
-}));
 export const AdminProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(() => {
         const saved = localStorage.getItem('sumilux_admin_user');
         if (saved) {
             try {
                 return JSON.parse(saved);
-            }
-            catch (e) {
-                return INITIAL_ADMIN_USERS[0];
+            } catch (e) {
+                return null;
             }
         }
-        return INITIAL_ADMIN_USERS[0];
+        return null;
     });
-    const [users, setUsers] = useState(INITIAL_ADMIN_USERS);
-    const [products, setProducts] = useState(() => {
-        const saved = localStorage.getItem('sumilux_products');
-        return saved ? JSON.parse(saved) : [];
-    });
-
-    const [orders, setOrders] = useState(() => {
-        const saved = localStorage.getItem('sumilux_orders');
-        return saved ? JSON.parse(saved) : [];
-    });
+    const [users, setUsers] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [orders, setOrders] = useState([]);
     const [payments, setPayments] = useState([]);
     const [paymentMetrics, setPaymentMetrics] = useState({
         totalSettled: 0,
@@ -96,33 +62,13 @@ export const AdminProvider = ({ children }) => {
         totalRefunded: 0,
         totalFailed: 0,
     });
-    const [returns, setReturns] = useState(INITIAL_RETURNS);
-    const [inventoryLogs, setInventoryLogs] = useState(normalizedInventoryLogs);
-    const [promotions, setPromotions] = useState(normalizedPromotions);
-    const [shopTheLookList, setShopTheLookList] = useState([
-        normalizedShopTheLook,
-        {
-            id: 'scene-02',
-            title: 'Place Vendôme Haute Evening',
-            season: 'Winter 2026',
-            image: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1200&auto=format&fit=crop',
-            active: true,
-            hotspots: [
-                {
-                    id: 'hs-201',
-                    x: 48,
-                    y: 42,
-                    productId: 'prd-004',
-                    productName: 'Numbered Atelier Sculpted Bias-Cut Gown',
-                    price: 4600,
-                    label: 'Numbered Atelier Bias-Cut Gown ($4,600)',
-                },
-            ],
-        },
-    ]);
-    const [shopTheLook, setShopTheLook] = useState(normalizedShopTheLook);
-    const [activityLogs, setActivityLogs] = useState(INITIAL_ACTIVITY_LOGS);
-    const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+    const [returns, setReturns] = useState([]);
+    const [inventoryLogs, setInventoryLogs] = useState([]);
+    const [promotions, setPromotions] = useState([]);
+    const [shopTheLookList, setShopTheLookList] = useState([]);
+    const [shopTheLook, setShopTheLook] = useState(null);
+    const [activityLogs, setActivityLogs] = useState([]);
+    const [notifications, setNotifications] = useState([]);
     const [toasts, setToasts] = useState([]);
     // UI state
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -202,9 +148,12 @@ export const AdminProvider = ({ children }) => {
                     internalNotes: o.notes ? [o.notes] : []
                 }));
                 setOrders(liveOrders);
+                return liveOrders;
             }
+            return [];
         } catch (err) {
             console.warn('Could not fetch live admin orders:', err.message);
+            return [];
         }
     };
 
@@ -214,13 +163,18 @@ export const AdminProvider = ({ children }) => {
             if (res.data?.status && Array.isArray(res.data.data)) {
                 setPayments(res.data.data || []);
                 if (res.data.metrics) setPaymentMetrics(res.data.metrics);
+                return res.data.data;
             }
+            return [];
         } catch (err) {
             console.warn('Could not fetch live admin payments:', err.message);
+            return [];
         }
     };
 
     useEffect(() => {
+        localStorage.removeItem('sumilux_products');
+        localStorage.removeItem('sumilux_orders');
         fetchOrders();
         fetchPayments();
     }, []);
@@ -233,22 +187,17 @@ export const AdminProvider = ({ children }) => {
             localStorage.removeItem('sumilux_admin_user');
         }
     }, [currentUser]);
-    useEffect(() => {
-        localStorage.setItem('sumilux_products', JSON.stringify(products));
-    }, [products]);
-    useEffect(() => {
-        localStorage.setItem('sumilux_orders', JSON.stringify(orders));
-    }, [orders]);
-    const showToast = (type, title, message) => {
+
+    const removeToast = useCallback((id) => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, []);
+    const showToast = useCallback((type, title, message) => {
         const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
         setToasts((prev) => [...prev, { id, type, title, message, duration: 4000 }]);
         setTimeout(() => {
             removeToast(id);
         }, 4500);
-    };
-    const removeToast = (id) => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-    };
+    }, [removeToast]);
     const logActivity = (module, action, target, details) => {
         const newLog = {
             id: `act-${Date.now()}`,
@@ -273,6 +222,9 @@ export const AdminProvider = ({ children }) => {
             setCurrentUser(user);
             showToast('success', `Welcome back, ${user.name}`, `Signed in as ${user.role}`);
             logActivity('Auth', 'Admin Login', user.name, `Successful login from secure workstation.`);
+            // Immediately sync live database orders and payments
+            fetchOrders();
+            fetchPayments();
             return true;
         } catch (error) {
             console.error('Login error:', error);

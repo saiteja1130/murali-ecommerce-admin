@@ -202,13 +202,6 @@ export const CategoryManager = () => {
     return found ? found.name : '—';
   };
 
-  const getImageUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    if (url.startsWith('/uploads')) return `http://localhost:5000${url}`;
-    return url;
-  };
-
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -249,11 +242,10 @@ export const CategoryManager = () => {
       <div className="flex items-center border-b border-[#E8E4DC] gap-4">
         <button
           onClick={() => setActiveTab('subcategories')}
-          className={`flex items-center gap-2 pb-3 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all cursor-pointer ${
-            activeTab === 'subcategories'
+          className={`flex items-center gap-2 pb-3 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all cursor-pointer ${activeTab === 'subcategories'
               ? 'border-[#1A1A1A] text-[#1A1A1A]'
               : 'border-transparent text-[#6B6864] hover:text-[#1A1A1A]'
-          }`}
+            }`}
         >
           <FolderTree className="w-4 h-4 text-[#C8A87C]" />
           <span>Subcategories ({categories.length})</span>
@@ -261,11 +253,10 @@ export const CategoryManager = () => {
 
         <button
           onClick={() => setActiveTab('main')}
-          className={`flex items-center gap-2 pb-3 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all cursor-pointer ${
-            activeTab === 'main'
+          className={`flex items-center gap-2 pb-3 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all cursor-pointer ${activeTab === 'main'
               ? 'border-[#1A1A1A] text-[#1A1A1A]'
               : 'border-transparent text-[#6B6864] hover:text-[#1A1A1A]'
-          }`}
+            }`}
         >
           <Layers className="w-4 h-4 text-[#C8A87C]" />
           <span>Main Categories / Departments ({mainCategories.length})</span>
@@ -307,7 +298,7 @@ export const CategoryManager = () => {
                             <div className="flex items-center gap-3">
                               {mCat.image ? (
                                 <img
-                                  src={getImageUrl(mCat.image)}
+                                  src={mCat.image}
                                   alt={mCat.name}
                                   className="w-10 h-10 rounded-lg object-cover border border-[#E8E4DC]"
                                 />
@@ -430,7 +421,7 @@ export const CategoryManager = () => {
                           <div className="flex items-center gap-3">
                             {subCat.image ? (
                               <img
-                                src={getImageUrl(subCat.image)}
+                                src={subCat.image}
                                 alt={subCat.name}
                                 className="w-10 h-10 rounded-lg object-cover border border-[#E8E4DC]"
                               />
@@ -583,7 +574,7 @@ export const CategoryManager = () => {
                   </label>
                   {mainImagePreview && (
                     <img
-                      src={getImageUrl(mainImagePreview)}
+                      src={mainImagePreview}
                       alt="Preview"
                       className="w-10 h-10 rounded-lg object-cover border border-[#E8E4DC]"
                     />
@@ -732,7 +723,7 @@ export const CategoryManager = () => {
                   </label>
                   {subImagePreview && (
                     <img
-                      src={getImageUrl(subImagePreview)}
+                      src={subImagePreview}
                       alt="Preview"
                       className="w-10 h-10 rounded-lg object-cover border border-[#E8E4DC]"
                     />

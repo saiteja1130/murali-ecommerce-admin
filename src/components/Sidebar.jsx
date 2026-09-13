@@ -37,11 +37,6 @@ export const Sidebar = () => {
           icon: Package
         },
         {
-          name: 'Add New Product',
-          path: '/admin/products/new',
-          icon: PlusCircle
-        },
-        {
           name: 'Categories',
           path: '/admin/categories',
           icon: Grid
@@ -137,7 +132,7 @@ export const Sidebar = () => {
           return (
             <div key={idx} className="space-y-1">
               {!isSidebarCollapsed && (
-                <div className="px-3 text-[10px] font-semibold tracking-[0.18em] text-[#506040] uppercase mb-1.5 font-sans">
+                <div className="px-3 text-[10px] font-bold tracking-[0.18em] mb-2 text-[#506040] uppercase mb-1.5 font-sans">
                   {section.title}
                 </div>
               )}

@@ -14,6 +14,7 @@ import {
   CheckSquare,
   Square,
   Loader2,
+  RefreshCw,
   ChevronLeft,
   ChevronRight,
   PackageCheck,
@@ -26,6 +27,7 @@ export const ProductList = () => {
   const {
     products,
     isLoading,
+    isFetching,
     pagination,
     fetchProducts,
     deleteProduct,
@@ -38,6 +40,7 @@ export const ProductList = () => {
 
   // Filters & State
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [stockFilter, setStockFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
@@ -53,13 +56,18 @@ export const ProductList = () => {
   const [stockModal, setStockModal] = useState({ isOpen: false, product: null, isLoading: false });
   const [bulkModal, setBulkModal] = useState({ isOpen: false, action: null, isLoading: false });
 
-  // Debounced server-side fetching
+  // Debounce search query only (300ms)
   useEffect(() => {
     const handler = setTimeout(() => {
-      fetchProducts(currentPage, limit, searchQuery, selectedCategory, stockFilter, sortBy);
+      setDebouncedSearch(searchQuery);
     }, 300);
     return () => clearTimeout(handler);
-  }, [currentPage, limit, searchQuery, selectedCategory, stockFilter, sortBy, fetchProducts]);
+  }, [searchQuery]);
+
+  // Server-side fetching: instant for filter/page changes, debounced for search input
+  useEffect(() => {
+    fetchProducts(currentPage, limit, debouncedSearch, selectedCategory, stockFilter, sortBy);
+  }, [currentPage, limit, debouncedSearch, selectedCategory, stockFilter, sortBy, fetchProducts]);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === products.length && products.length > 0) {
@@ -183,13 +191,28 @@ export const ProductList = () => {
             <span className="px-2.5 py-0.5 rounded-full text-[10px] uppercase font-mono tracking-widest bg-[#506040]/15 text-[#506040] font-bold">
               {pagination.total} Products
             </span>
+            {isFetching && (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#C69E58]/15 text-[#8C6D37] animate-pulse">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Syncing...
+              </span>
+            )}
           </div>
           <p className="text-xs text-[#687163] mt-1">
             Manage your products, categories, pricing, stock availability, and variants.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => fetchProducts(currentPage, limit, debouncedSearch, selectedCategory, stockFilter, sortBy, true)}
+            disabled={isFetching || isLoading}
+            className="p-2 bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-[#687163] hover:text-[#1D241C] transition-colors cursor-pointer disabled:opacity-40 shadow-2xs"
+            title="Refresh Catalog"
+            aria-label="Refresh Catalog"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin text-[#C69E58]' : ''}`} />
+          </button>
           <button
             onClick={handleExportCSV}
             className="px-3.5 py-2 bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-semibold text-[#1D241C] transition-colors flex items-center gap-2 shadow-2xs cursor-pointer"
@@ -270,57 +293,7 @@ export const ProductList = () => {
             <option value="name_desc">Name: Z to A</option>
           </select>
         </div>
-
-        {/* Bulk Actions Bar & Density Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#E8E4DC] text-xs">
-          <div className="flex items-center gap-3">
-            {selectedIds.length > 0 ? (
-              <div className="flex items-center gap-2 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-[#E8E4DC]">
-                <span className="font-semibold text-[#1D241C]">
-                  {selectedIds.length} selected
-                </span>
-                <div className="h-3 w-px bg-[#E8E4DC]" />
-                <button
-                  onClick={() => handleOpenBulkAction('in_stock')}
-                  className="text-[#506040] hover:underline font-medium cursor-pointer"
-                >
-                  Enable Stock
-                </button>
-                <button
-                  onClick={() => handleOpenBulkAction('archived')}
-                  className="text-red-700 hover:underline font-medium cursor-pointer"
-                >
-                  Archive
-                </button>
-              </div>
-            ) : (
-              <span className="text-[#687163]">
-                Showing <span className="font-semibold text-[#1D241C]">{products.length}</span> of{' '}
-                {pagination.total} products
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-[#6B6864]">Density:</span>
-            <button
-              onClick={() => setDensity('comfortable')}
-              className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
-                density === 'comfortable' ? 'bg-[#1A1A1A] text-white' : 'bg-[#F2EFE9] text-[#6B6864]'
-              }`}
-            >
-              Spacious
-            </button>
-            <button
-              onClick={() => setDensity('compact')}
-              className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
-                density === 'compact' ? 'bg-[#1A1A1A] text-white' : 'bg-[#F2EFE9] text-[#6B6864]'
-              }`}
-            >
-              Compact
-            </button>
-          </div>
-        </div>
+       
       </div>
 
       {/* Product Table */}
@@ -354,8 +327,8 @@ export const ProductList = () => {
                 <th className="py-3.5 px-4 text-right font-semibold">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F2EFE9] text-xs">
-              {isLoading ? (
+            <tbody className={`divide-y divide-[#F2EFE9] text-xs transition-opacity duration-200 ${isFetching ? 'opacity-60' : ''}`}>
+              {isLoading && products.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-16 text-center text-[#A68758]">
                     <div className="flex flex-col items-center justify-center space-y-2">
@@ -526,7 +499,7 @@ export const ProductList = () => {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={pagination.page <= 1 || isLoading}
+              disabled={pagination.page <= 1 || isLoading || isFetching}
               className="p-1.5 rounded-lg bg-white border border-[#E8E4DC] text-[#1A1A1A] hover:bg-[#F2EFE9] disabled:opacity-30 disabled:hover:bg-white transition-colors cursor-pointer"
               title="Previous page"
             >
@@ -537,7 +510,7 @@ export const ProductList = () => {
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))}
-              disabled={pagination.page >= pagination.totalPages || isLoading}
+              disabled={pagination.page >= pagination.totalPages || isLoading || isFetching}
               className="p-1.5 rounded-lg bg-white border border-[#E8E4DC] text-[#1A1A1A] hover:bg-[#F2EFE9] disabled:opacity-30 disabled:hover:bg-white transition-colors cursor-pointer"
               title="Next page"
             >

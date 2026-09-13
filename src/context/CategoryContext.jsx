@@ -31,6 +31,7 @@ export const CategoryProvider = ({ children }) => {
     setIsLoadingMain(true);
     try {
       const response = await api.get('/api/main-categories');
+      console.log("fetchMainCategories",response.data)
       setMainCategories(
         (response.data?.data || []).map((mCat) => ({
           ...mCat,

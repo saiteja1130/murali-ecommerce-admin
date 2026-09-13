@@ -74,7 +74,7 @@ export const Topbar = () => {
             <div className="flex items-center gap-2.5">
               <Search className="w-4 h-4 text-[#C8A87C] group-hover:scale-110 transition-transform" />
               <span className="font-sans text-[#6B6864] group-hover:text-[#1A1A1A]">
-                Quick Search (Orders, Products, Patrons, Categories)...
+                Quick Search (Orders, Products, Users, Categories)...
               </span>
             </div>
             <div className="flex items-center gap-1">

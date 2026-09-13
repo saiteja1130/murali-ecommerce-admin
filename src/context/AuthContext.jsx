@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { INITIAL_ADMIN_USERS } from '../data/mockData';
 import api from './api';
 
 const defaultAuthContext = {

@@ -1,10 +1,31 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAdmin } from '../../context/AdminContext';
-import { Search, Download, RotateCcw, ChevronRight, CreditCard } from 'lucide-react';
+import { Search, Download, RotateCcw, ChevronRight, CreditCard, RefreshCw } from 'lucide-react';
+
 export const OrderList = () => {
-    const { orders, showToast } = useAdmin();
+    const { orders, fetchOrders, showToast } = useAdmin();
     const navigate = useNavigate();
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    useEffect(() => {
+        if (typeof fetchOrders === 'function') {
+            fetchOrders();
+        }
+    }, []);
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        try {
+            await fetchOrders();
+            showToast('success', 'Orders Synced', 'Live orders updated from server.');
+        } catch (e) {
+            showToast('danger', 'Sync Failed', 'Failed to refresh orders.');
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
+
     // Filters
     const [searchQuery, setSearchQuery] = useState('');
     const [statusTab, setStatusTab] = useState('all');
@@ -106,6 +127,16 @@ export const OrderList = () => {
 
         <div className="flex items-center gap-3">
           <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="px-3.5 py-2 bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] text-[#1A1A1A] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
+            title="Refresh orders from live database"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#C8A87C] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? 'Syncing...' : 'Sync Orders'}</span>
+          </button>
+
+          <button
             onClick={handleExportCSV}
             className="px-3.5 py-2 bg-[#1A1A1A] hover:bg-[#333333] text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
           >
@@ -120,6 +151,7 @@ export const OrderList = () => {
         {[
             { id: 'all', label: 'All Orders' },
             { id: 'confirmed', label: 'Confirmed' },
+            { id: 'pending', label: 'Pending' },
             { id: 'processing', label: 'Processing' },
             { id: 'shipped', label: 'Shipped / In Transit' },
             { id: 'delivered', label: 'Delivered' },

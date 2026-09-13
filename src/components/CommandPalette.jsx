@@ -130,7 +130,7 @@ export const CommandPalette = () => {
       .slice(0, 3)
       .map((c) => ({
         id: `cst-${c.id}`,
-        category: 'Users / Patrons',
+        category: 'Users',
         title: c.name,
         subtitle: `${c.email} • ${c.vipTier || 'Client'} • Spent: ₹${(c.totalSpent || 0).toLocaleString('en-IN')}`,
         icon: Users,
@@ -204,7 +204,7 @@ export const CommandPalette = () => {
               setSelectedIndex(0);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Search products, orders, patrons, categories, or jump to page..."
+            placeholder="Search products, orders, users, categories, or jump to page..."
             className="w-full bg-transparent text-sm text-[#1A1A1A] placeholder-[#6B6864] focus:outline-none font-sans"
           />
           {query && (

@@ -215,7 +215,7 @@ export const Dashboard = () => {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Revenue"
           value={`₹${(analytics.kpis?.totalRevenue || 0).toLocaleString('en-IN')}`}
@@ -231,15 +231,8 @@ export const Dashboard = () => {
           icon={ShoppingBag}
         />
         <StatCard
-          label="Average Order Value"
-          value={`₹${(analytics.kpis?.avgOrderValue || 0).toLocaleString('en-IN')}`}
-          subValue="Avg per paid sale"
-          change={analytics.kpis?.aovGrowth}
-          icon={TrendingUp}
-        />
-        <StatCard
-          label="Total Customers"
-          value={`${analytics.kpis?.totalCustomers || 0} Patrons`}
+          label="Total Users"
+          value={`${analytics.kpis?.totalCustomers || 0} Users`}
           subValue="Registered user accounts"
           icon={Users}
         />

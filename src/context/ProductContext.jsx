@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import api from './api';
 import { useAdmin } from './AdminContext';
 
 const defaultProductContext = {
   products: [],
   isLoading: false,
+  isFetching: false,
   pagination: { page: 1, limit: 12, total: 0, totalPages: 1 },
   fetchProducts: async () => {},
   fetchProductById: async () => null,
@@ -21,45 +22,75 @@ export const ProductProvider = ({ children }) => {
   const { showToast, logActivity } = useAdmin();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
 
-  const fetchProducts = useCallback(async (page = 1, limit = 12, search = '', category = 'all', stockStatus = 'all', sort = 'newest') => {
-    setIsLoading(true);
-    try {
-      const queryParams = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-      });
-      if (search) queryParams.append('search', search);
-      if (category && category !== 'all') queryParams.append('category', category);
-      if (stockStatus && stockStatus !== 'all') queryParams.append('stockStatus', stockStatus);
-      if (sort) queryParams.append('sort', sort);
+  const hasLoadedRef = useRef(false);
+  const currentParamsRef = useRef('');
 
-      const response = await api.get(`/api/products?${queryParams.toString()}`);
-      const data = response.data;
+  const fetchProducts = useCallback(
+    async (
+      page = 1,
+      limit = 12,
+      search = '',
+      category = 'all',
+      stockStatus = 'all',
+      sort = 'newest',
+      force = false
+    ) => {
+      const paramsKey = JSON.stringify({ page, limit, search, category, stockStatus, sort });
 
-      const mappedProducts = (data.data || []).map((p) => ({
-        ...p,
-        id: p._id,
-        categoryName: p.category?.name || 'Unassigned',
-        categorySlug: p.category?.slug || '',
-        categoryId: p.category?._id || p.category,
-      }));
+      // Skip duplicate fetch if already loaded with exact same parameters
+      if (!force && hasLoadedRef.current && currentParamsRef.current === paramsKey) {
+        return;
+      }
 
-      setProducts(mappedProducts);
-      setPagination({
-        page: data.page || 1,
-        limit,
-        total: data.total || 0,
-        totalPages: data.totalPages || 1,
-      });
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
-      showToast('danger', 'Error', error.response?.data?.message || 'Failed to fetch products');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [showToast]);
+      if (hasLoadedRef.current) {
+        setIsFetching(true);
+      } else {
+        setIsLoading(true);
+      }
+
+      try {
+        const queryParams = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+        if (search) queryParams.append('search', search);
+        if (category && category !== 'all') queryParams.append('category', category);
+        if (stockStatus && stockStatus !== 'all') queryParams.append('stockStatus', stockStatus);
+        if (sort) queryParams.append('sort', sort);
+
+        const response = await api.get(`/api/products?${queryParams.toString()}`);
+        const data = response.data;
+
+        const mappedProducts = (data.data || []).map((p) => ({
+          ...p,
+          id: p._id,
+          categoryName: p.category?.name || 'Unassigned',
+          categorySlug: p.category?.slug || '',
+          categoryId: p.category?._id || p.category,
+        }));
+
+        setProducts(mappedProducts);
+        currentParamsRef.current = paramsKey;
+        hasLoadedRef.current = true;
+        setPagination({
+          page: data.page || 1,
+          limit,
+          total: data.total || 0,
+          totalPages: data.totalPages || 1,
+        });
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+        showToast('danger', 'Error', error.response?.data?.message || 'Failed to fetch products');
+      } finally {
+        setIsLoading(false);
+        setIsFetching(false);
+      }
+    },
+    [showToast]
+  );
 
   useEffect(() => {
     fetchProducts();
@@ -187,6 +218,7 @@ export const ProductProvider = ({ children }) => {
       value={{
         products,
         isLoading,
+        isFetching,
         pagination,
         fetchProducts,
         fetchProductById,

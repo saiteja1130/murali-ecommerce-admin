@@ -21,7 +21,7 @@ export const OrderDetail = () => {
   const { orders, updateOrderStatus, addOrderNote, refundOrder, showToast, currentUser } = useAdmin();
   const navigate = useNavigate();
 
-  const order = orders.find((o) => o.id === id);
+  const order = orders.find((o) => o.id === id || o._id === id || o.orderNumber === id);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundReason, setRefundReason] = useState('Customer requested return/refund');

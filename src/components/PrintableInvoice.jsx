@@ -60,7 +60,7 @@ export const PrintableInvoice = ({ order, onClose }) => {
                 Date: {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </div>
               <div className="inline-block mt-2 px-2.5 py-0.5 rounded border border-[#C8A87C] text-[#A68758] text-[10px] uppercase tracking-widest font-semibold">
-                {order.customer?.vipTier || 'Client Patron'}
+                {order.customer?.vipTier || 'Client User'}
               </div>
             </div>
           </div>
