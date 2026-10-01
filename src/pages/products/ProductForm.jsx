@@ -17,6 +17,7 @@ import {
   Loader2,
   CheckCircle2,
   XCircle,
+  Palette,
 } from 'lucide-react';
 
 export const ProductForm = ({ mode }) => {
@@ -26,6 +27,8 @@ export const ProductForm = ({ mode }) => {
   const { showToast } = useAdmin();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  // Per-color file input refs: { [colorKey]: React.RefObject }
+  const colorFileInputRefs = useRef({});
 
   // Form State
   const [name, setName] = useState('');
@@ -47,6 +50,10 @@ export const ProductForm = ({ mode }) => {
   // Images state (holds { id, url, file?: File })
   const [images, setImages] = useState([]);
   const [newImageUrl, setNewImageUrl] = useState('');
+
+  // Color Images state: { [colorKey]: [{id, url, file?, color, colorHex}] }
+  const [colorImages, setColorImages] = useState({});
+  const [activeColorTab, setActiveColorTab] = useState(null);
 
   // Sizes state (for all / non-variant products)
   const [sizes, setSizes] = useState([]);
@@ -111,6 +118,23 @@ export const ProductForm = ({ mode }) => {
 
             if (p.images && Array.isArray(p.images)) {
               setImages(p.images.map((imgUrl, i) => ({ id: `existing-${i}`, url: imgUrl })));
+            }
+
+            // Load existing colorImages into state
+            if (p.colorImages && Array.isArray(p.colorImages) && p.colorImages.length > 0) {
+              const loaded = {};
+              p.colorImages.forEach((ci) => {
+                const key = (ci.color || '').toLowerCase();
+                if (key) {
+                  loaded[key] = (ci.images || []).map((imgUrl, i) => ({
+                    id: `ci-${key}-${i}`,
+                    url: imgUrl,
+                    color: ci.color,
+                    colorHex: ci.colorHex || '#1A1A1A',
+                  }));
+                }
+              });
+              setColorImages(loaded);
             }
 
             if (p.sizes && Array.isArray(p.sizes)) {
@@ -206,6 +230,52 @@ export const ProductForm = ({ mode }) => {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
+  // Derive unique colors from variants for per-color image sections
+  const uniqueColors = React.useMemo(() => {
+    const seen = new Map();
+    variants.forEach((v) => {
+      const key = (v.color || '').trim().toLowerCase();
+      if (key && !seen.has(key)) {
+        seen.set(key, { name: v.color.trim(), hex: v.colorHex || '#1A1A1A' });
+      }
+    });
+    return Array.from(seen.values());
+  }, [variants]);
+
+  // Per-color image file handlers
+  const handleColorFileSelect = (colorKey, colorName, colorHex, e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const newObjs = files.map((file) => ({
+      id: `cnew-${colorKey}-${Date.now()}-${Math.random()}`,
+      url: URL.createObjectURL(file),
+      file,
+      color: colorName,
+      colorHex,
+    }));
+    setColorImages((prev) => ({
+      ...prev,
+      [colorKey]: [...(prev[colorKey] || []), ...newObjs],
+    }));
+    if (colorFileInputRefs.current[colorKey]) colorFileInputRefs.current[colorKey].value = '';
+  };
+
+  const handleRemoveColorImage = (colorKey, index) => {
+    setColorImages((prev) => ({
+      ...prev,
+      [colorKey]: (prev[colorKey] || []).filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleSetColorPrimaryImage = (colorKey, index) => {
+    setColorImages((prev) => {
+      const arr = [...(prev[colorKey] || [])];
+      const [picked] = arr.splice(index, 1);
+      return { ...prev, [colorKey]: [picked, ...arr] };
+    });
+    showToast('info', 'Cover Updated', `Primary color image updated for ${colorKey}.`);
+  };
+
   // File Upload Handlers (FormData)
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files || []);
@@ -287,12 +357,37 @@ export const ProductForm = ({ mode }) => {
       const existingUrls = images.filter((img) => !img.file).map((img) => img.url);
       formData.append('existingImages', JSON.stringify(existingUrls));
 
-      // Newly attached files to upload via Multer
+      // Newly attached files to upload via Multer — general images first, then color images
+      // We track a running fileIndex so colorImagesMeta can reference the correct position
+      let fileIndex = 0;
+      const colorImagesBodyPayload = []; // [{color, colorHex, images:[existingUrls]}]
+      const colorImagesMetaPayload = []; // [{fileIndex, color, colorHex}]
+
+      // General (non-color) new files
       images.forEach((img) => {
         if (img.file) {
           formData.append('images', img.file);
+          fileIndex++;
         }
       });
+
+      // Per-color images
+      uniqueColors.forEach(({ name: colorName, hex: colorHex }) => {
+        const colorKey = colorName.toLowerCase();
+        const colorImgs = colorImages[colorKey] || [];
+        const existingColorUrls = colorImgs.filter((ci) => !ci.file).map((ci) => ci.url);
+        colorImagesBodyPayload.push({ color: colorName, colorHex, images: existingColorUrls });
+        colorImgs.forEach((ci) => {
+          if (ci.file) {
+            formData.append('images', ci.file);
+            colorImagesMetaPayload.push({ fileIndex, color: colorName, colorHex });
+            fileIndex++;
+          }
+        });
+      });
+
+      formData.append('colorImages', JSON.stringify(colorImagesBodyPayload));
+      formData.append('colorImagesMeta', JSON.stringify(colorImagesMetaPayload));
 
       if (mode === 'edit' && id) {
         await updateProduct(id, formData);
@@ -521,7 +616,148 @@ export const ProductForm = ({ mode }) => {
             </div>
           </div>
 
+          {/* ── Color-Specific Photos Card ────────────────── */}
+          {uniqueColors.length > 0 && (
+            <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-[#E8E4DC] pb-3">
+                <h2 className="font-serif text-lg font-bold text-[#1D241C] flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-[#C69E58]" />
+                  <span>Color Photos</span>
+                </h2>
+                <span className="text-xs text-[#687163]">
+                  Upload images per color — customers see matching gallery on selection
+                </span>
+              </div>
+
+              {/* Color Tab Pills */}
+              <div className="flex flex-wrap gap-2">
+                {uniqueColors.map(({ name: colorName, hex }) => {
+                  const colorKey = colorName.toLowerCase();
+                  const imgCount = (colorImages[colorKey] || []).length;
+                  const isActive = activeColorTab === colorKey;
+                  return (
+                    <button
+                      key={colorKey}
+                      type="button"
+                      onClick={() => setActiveColorTab(isActive ? null : colorKey)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-[#1D241C] text-white border-[#1D241C] shadow-sm'
+                          : 'bg-[#FAF8F5] text-[#1D241C] border-[#E8E4DC] hover:border-[#C69E58]'
+                      }`}
+                    >
+                      <span
+                        className="w-3 h-3 rounded-full border border-white/40 shrink-0"
+                        style={{ backgroundColor: hex }}
+                      />
+                      <span>{colorName}</span>
+                      {imgCount > 0 && (
+                        <span
+                          className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
+                            isActive ? 'bg-white/20 text-white' : 'bg-[#C69E58]/15 text-[#A68758]'
+                          }`}
+                        >
+                          {imgCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Active Color Upload Panel */}
+              {activeColorTab && (() => {
+                const activeColor = uniqueColors.find((c) => c.name.toLowerCase() === activeColorTab);
+                if (!activeColor) return null;
+                const { name: colorName, hex: colorHex } = activeColor;
+                const colorImgList = colorImages[activeColorTab] || [];
+
+                return (
+                  <div key={activeColorTab} className="space-y-3">
+                    {/* Header strip */}
+                    <div className="flex items-center gap-2 px-3 py-2 bg-[#FAF8F5] rounded-xl border border-[#E8E4DC]">
+                      <span
+                        className="w-4 h-4 rounded-full border border-[#E8E4DC] shrink-0"
+                        style={{ backgroundColor: colorHex }}
+                      />
+                      <span className="text-xs font-semibold text-[#1D241C]">
+                        {colorName} — {colorImgList.length} image{colorImgList.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+
+                    {/* Image Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {colorImgList.map((img, index) => (
+                        <div
+                          key={img.id || index}
+                          className="relative group rounded-xl overflow-hidden border border-[#E8E4DC] bg-[#FAF8F5] aspect-3/4 shadow-2xs"
+                        >
+                          <img src={img.url} alt={`${colorName} ${index}`} className="w-full h-full object-cover" />
+                          {index === 0 && (
+                            <div className="absolute top-2 left-2 px-2 py-0.5 bg-[#1A1A1A]/80 text-white text-[9px] uppercase font-mono tracking-wider rounded-md backdrop-blur-xs">
+                              Cover
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
+                            {index !== 0 && (
+                              <button
+                                type="button"
+                                onClick={() => handleSetColorPrimaryImage(activeColorTab, index)}
+                                className="px-2 py-1 bg-white text-[#1A1A1A] text-[10px] font-semibold rounded-md hover:bg-[#FAF8F5] cursor-pointer"
+                              >
+                                Set Cover
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveColorImage(activeColorTab, index)}
+                              className="p-1.5 bg-[#A5432F] text-white rounded-md hover:bg-red-700 cursor-pointer"
+                              title="Remove image"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Color Upload Dropzone */}
+                      <div
+                        onClick={() => {
+                          if (!colorFileInputRefs.current[activeColorTab]) {
+                            colorFileInputRefs.current[activeColorTab] = document.createElement('input');
+                            colorFileInputRefs.current[activeColorTab].type = 'file';
+                            colorFileInputRefs.current[activeColorTab].multiple = true;
+                            colorFileInputRefs.current[activeColorTab].accept = 'image/*';
+                            colorFileInputRefs.current[activeColorTab].onchange = (e) =>
+                              handleColorFileSelect(activeColorTab, colorName, colorHex, e);
+                          }
+                          colorFileInputRefs.current[activeColorTab].click();
+                        }}
+                        className="aspect-3/4 border-2 border-dashed border-[#E8E4DC] hover:border-[#C8A87C] bg-[#FAF8F5]/50 hover:bg-[#FAF8F5] rounded-xl flex flex-col items-center justify-center p-3 text-center cursor-pointer transition-colors"
+                      >
+                        <span
+                          className="w-5 h-5 rounded-full mb-1.5 border-2 border-dashed border-[#A68758]"
+                          style={{ backgroundColor: colorHex + '33' }}
+                        />
+                        <UploadCloud className="w-5 h-5 text-[#A68758] mb-1" />
+                        <span className="text-[11px] font-semibold text-[#1A1A1A]">Add {colorName}</span>
+                        <span className="text-[9px] text-[#6B6864] mt-0.5">JPG, PNG, WEBP</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {!activeColorTab && (
+                <p className="text-xs text-center text-[#9B9690] py-4">
+                  Select a color above to manage its photos
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Product Sizes (For Non-Variant or General Products) */}
+
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-4">
             <div className="flex items-center justify-between border-b border-[#E8E4DC] pb-3">
               <div>

@@ -219,8 +219,19 @@ export const OrderDetail = () => {
                 const itemTotal = Number(item.totalPrice !== undefined ? item.totalPrice : (unitPrice * qty));
                 const itemName = item.name || item.productName || item.product?.name || 'Garment Piece';
                 const itemColor = item.color || (typeof item.selectedColor === 'object' ? item.selectedColor?.name : item.selectedColor) || 'Standard';
+                const itemColorHex = typeof item.selectedColor === 'object' ? item.selectedColor?.hex : '#1D241C';
                 const itemSize = item.size || item.selectedSize || 'Standard';
-                const itemImg = item.image || item.product?.image || (Array.isArray(item.product?.images) && item.product.images[0]) || '';
+
+                // Check for color-specific image match in product.colorImages or use item.image
+                const colorKey = (itemColor || '').trim().toLowerCase();
+                let matchedColorImg = '';
+                if (colorKey && Array.isArray(item.product?.colorImages) && item.product.colorImages.length > 0) {
+                  const match = item.product.colorImages.find((ci) => (ci.color || '').trim().toLowerCase() === colorKey);
+                  if (match && Array.isArray(match.images) && match.images.length > 0) {
+                    matchedColorImg = match.images[0];
+                  }
+                }
+                const itemImg = item.image || matchedColorImg || item.product?.image || (Array.isArray(item.product?.images) && item.product.images[0]) || '';
 
                 return (
                   <div key={item.id || item._id || idx} className="py-4 flex items-center gap-4 first:pt-0 last:pb-0">
@@ -230,7 +241,7 @@ export const OrderDetail = () => {
                       onError={(e) => {
                         e.currentTarget.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=900';
                       }}
-                      className="w-16 h-20 rounded-xl object-cover border border-[#E8E4DC] shrink-0"
+                      className="w-16 h-20 rounded-xl object-cover border border-[#E8E4DC] shrink-0 bg-[#FAF8F5]"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-sm text-[#1D241C]">
@@ -239,7 +250,13 @@ export const OrderDetail = () => {
                       <div className="text-xs text-[#687163] mt-0.5 flex flex-wrap items-center gap-2">
                         {item.sku && <span className="font-mono">{item.sku}</span>}
                         <span>•</span>
-                        <span>Color: <strong>{itemColor}</strong></span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full border border-neutral-300 inline-block"
+                            style={{ backgroundColor: itemColorHex }}
+                          />
+                          <span>Color: <strong>{itemColor}</strong></span>
+                        </span>
                         <span>•</span>
                         <span>Size: <strong>{itemSize}</strong></span>
                       </div>
