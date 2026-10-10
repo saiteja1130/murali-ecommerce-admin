@@ -18,7 +18,7 @@ import {
 
 export const OrderDetail = () => {
   const { id } = useParams();
-  const { orders, updateOrderStatus, addOrderNote, refundOrder, showToast, currentUser } = useAdmin();
+  const { orders, updateOrderStatus, updatePaymentStatus, addOrderNote, refundOrder, showToast, currentUser } = useAdmin();
   const navigate = useNavigate();
 
   const order = orders.find((o) => o.id === id || o._id === id || o.orderNumber === id);
@@ -128,6 +128,18 @@ export const OrderDetail = () => {
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Issue Refund</span>
+            </button>
+          )}
+
+          {order.paymentStatus === 'cod_pending' && (
+            <button
+              onClick={async () => {
+                await updatePaymentStatus(order.id || order._id, 'paid');
+              }}
+              className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition-colors flex items-center gap-2 cursor-pointer shadow-2xs"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Mark Payment Collected (PAID)</span>
             </button>
           )}
         </div>

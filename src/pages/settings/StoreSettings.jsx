@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAdmin } from '../../context/AdminContext';
 import api from '../../context/api';
-import { Truck, Save, Tag, Sparkles, Loader2 } from 'lucide-react';
+import { Truck, Save, Tag, Sparkles, Loader2, Banknote } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
 
 export const StoreSettings = () => {
@@ -13,6 +13,10 @@ export const StoreSettings = () => {
   // Shipping state (Backend Sync)
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(5000);
   const [standardShippingRate, setStandardShippingRate] = useState(30);
+
+  // Cash on Delivery (COD) state (Backend Sync)
+  const [isCodEnabled, setIsCodEnabled] = useState(true);
+  const [maxCodAmount, setMaxCodAmount] = useState(25000);
 
   // Promo Code & Discount state (Backend Sync)
   const [promoCode, setPromoCode] = useState('SUMI15');
@@ -33,6 +37,8 @@ export const StoreSettings = () => {
           if (s.promoCode !== undefined) setPromoCode(s.promoCode);
           if (s.discountPercent !== undefined) setDiscountPercent(s.discountPercent);
           if (s.isPromoActive !== undefined) setIsPromoActive(s.isPromoActive);
+          if (s.isCodEnabled !== undefined) setIsCodEnabled(s.isCodEnabled);
+          if (s.maxCodAmount !== undefined) setMaxCodAmount(s.maxCodAmount);
         }
       } catch (err) {
         console.warn('Failed to fetch backend settings, using local fallback:', err.message);
@@ -58,6 +64,8 @@ export const StoreSettings = () => {
         promoCode: promoCode.trim().toUpperCase(),
         discountPercent: Number(discountPercent),
         isPromoActive: Boolean(isPromoActive),
+        isCodEnabled: Boolean(isCodEnabled),
+        maxCodAmount: Number(maxCodAmount),
       };
 
       const response = await api.put('/api/settings', payload);
@@ -214,6 +222,70 @@ export const StoreSettings = () => {
                   <Sparkles className="w-3.5 h-3.5" />
                   <span><strong>₹{Number(freeShippingThreshold).toLocaleString('en-IN')}+:</strong> Free Shipping Progress Bar Unlocked!</span>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Cash on Delivery (COD) Controls */}
+          <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E8E4DC] pb-4">
+              <div>
+                <h2 className="font-serif text-xl font-bold text-[#1D241C] flex items-center gap-2">
+                  <Banknote className="w-5 h-5 text-[#C69E58]" />
+                  <span>Cash on Delivery (COD) Rules</span>
+                </h2>
+                <p className="text-xs text-[#687163] mt-1">
+                  Control Cash on Delivery availability across your storefront and configure risk limits.
+                </p>
+              </div>
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <span className="text-xs font-semibold text-[#1D241C]">
+                  {isCodEnabled ? 'COD Active' : 'COD Disabled'}
+                </span>
+                <input
+                  type="checkbox"
+                  checked={isCodEnabled}
+                  onChange={(e) => setIsCodEnabled(e.target.checked)}
+                  className="w-4 h-4 text-[#506040] rounded focus:ring-[#506040]"
+                />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-[#1D241C] uppercase tracking-wider">
+                  Maximum COD Order Value (₹ INR) *
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono text-xs font-bold text-[#687163]">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    step="500"
+                    value={maxCodAmount}
+                    onChange={(e) => setMaxCodAmount(e.target.value)}
+                    className="w-full pl-8 pr-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-xs font-mono font-bold text-[#1D241C] focus:outline-none focus:border-[#C69E58]"
+                  />
+                </div>
+                <p className="text-[11px] text-[#687163]">
+                  Orders above this value will require upfront UPI or Card payment to prevent courier return risks.
+                </p>
+              </div>
+
+              <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#E8E4DC] flex flex-col justify-center space-y-1.5 text-xs text-[#1D241C]">
+                <div className="font-bold flex items-center gap-1.5">
+                  <span className={`w-2 h-2 rounded-full ${isCodEnabled ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                  <span>Status: {isCodEnabled ? 'Enabled on Storefront' : 'Disabled on Storefront'}</span>
+                </div>
+                <p className="text-[11px] text-[#687163] leading-relaxed">
+                  {isCodEnabled
+                    ? `Shoppers can place COD orders up to ₹${Number(maxCodAmount).toLocaleString('en-IN')}. Orders are verified and auto-settled to PAID upon delivery confirmation.`
+                    : 'The COD option is blocked on the checkout page. Shoppers will only be able to checkout using Razorpay UPI / Cards.'}
+                </p>
               </div>
             </div>
           </div>

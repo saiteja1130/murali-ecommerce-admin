@@ -333,6 +333,19 @@ export const AdminProvider = ({ children }) => {
             showToast('success', 'Order Status Updated', `Order marked as ${status}`);
         }
     };
+    const updatePaymentStatus = async (id, paymentStatus) => {
+        try {
+            await api.patch(`/api/orders/${id}/status`, { paymentStatus });
+            await fetchOrders();
+            await fetchPayments();
+            showToast('success', 'Payment Status Updated', `Payment marked as ${paymentStatus.toUpperCase()}`);
+            logActivity('Orders', 'Updated Payment Status', `Order ${id}`, `Payment status moved to ${paymentStatus}`);
+        } catch (err) {
+            console.error('Failed to update payment status on server:', err);
+            setOrders((prev) => prev.map((o) => (o.id === id || o._id === id ? { ...o, paymentStatus } : o)));
+            showToast('success', 'Payment Status Updated', `Payment marked as ${paymentStatus.toUpperCase()}`);
+        }
+    };
     const addOrderNote = (id, note) => {
         setOrders((prev) => prev.map((o) => (o.id === id || o._id === id ? { ...o, internalNotes: [...(o.internalNotes || []), note] } : o)));
         showToast('info', 'Internal Note Added', 'Private client note attached to order.');
@@ -475,6 +488,7 @@ export const AdminProvider = ({ children }) => {
         fetchPayments,
         paymentMetrics,
         updateOrderStatus,
+        updatePaymentStatus,
         addOrderNote,
         processRefund,
         updateOrderTracking,
