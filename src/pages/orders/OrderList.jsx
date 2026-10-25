@@ -234,8 +234,16 @@ export const OrderList = () => {
                       <div className="font-semibold text-[#1D241C]">{order.customer?.name || order.customerName || 'Customer'}</div>
                       <div className="text-[10px] text-[#687163]">{order.customer?.city || order.customer?.email || order.customerEmail || ''}</div>
                     </td>
-                    <td className="py-3.5 px-3 text-[#687163] max-w-xs truncate">
-                      {(order.items || []).map((i) => `${i.quantity || 1}x ${i.productName || i.name || 'Product'}`).join(', ')}
+                    <td className="py-3.5 px-3 text-[#687163] max-w-xs truncate" title={(order.items || []).map((i) => {
+                      const color = i.selectedColor?.name || (typeof i.selectedColor === 'string' ? i.selectedColor : i.color);
+                      const colorStr = color && color !== 'Standard' ? ` (${color})` : '';
+                      return `${i.quantity || 1}x ${i.productName || i.name || 'Product'}${colorStr}`;
+                    }).join(', ')}>
+                      {(order.items || []).map((i) => {
+                        const color = i.selectedColor?.name || (typeof i.selectedColor === 'string' ? i.selectedColor : i.color);
+                        const colorStr = color && color !== 'Standard' ? ` (${color})` : '';
+                        return `${i.quantity || 1}x ${i.productName || i.name || 'Product'}${colorStr}`;
+                      }).join(', ')}
                     </td>
                     <td className="py-3.5 px-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold uppercase ${order.paymentStatus === 'paid'

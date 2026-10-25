@@ -224,17 +224,19 @@ export const OrderDetail = () => {
               </span>
             </h2>
 
-            <div className="divide-y divide-[#E8E4DC]">
+            <div className="bg-white rounded-[4px] border border-[#E8E4DC] overflow-hidden shadow-2xs divide-y divide-[#E8E4DC]">
               {(order.items || []).map((item, idx) => {
                 const unitPrice = Number(item.price !== undefined ? item.price : (item.unitPrice !== undefined ? item.unitPrice : (item.product?.price || 0)));
                 const qty = Number(item.quantity || 1);
                 const itemTotal = Number(item.totalPrice !== undefined ? item.totalPrice : (unitPrice * qty));
                 const itemName = item.name || item.productName || item.product?.name || 'Garment Piece';
+                const itemCategory = item.category || item.product?.category?.name || item.product?.category || 'Luxury Haute';
+                const itemSku = item.sku || item.product?.sku || '';
                 const itemColor = item.color || (typeof item.selectedColor === 'object' ? item.selectedColor?.name : item.selectedColor) || 'Standard';
                 const itemColorHex = typeof item.selectedColor === 'object' ? item.selectedColor?.hex : '#1D241C';
                 const itemSize = item.size || item.selectedSize || 'Standard';
 
-                // Check for color-specific image match in product.colorImages or use item.image
+                // Resolve exact color-variant image from product.colorImages or item.image
                 const colorKey = (itemColor || '').trim().toLowerCase();
                 let matchedColorImg = '';
                 if (colorKey && Array.isArray(item.product?.colorImages) && item.product.colorImages.length > 0) {
@@ -243,42 +245,70 @@ export const OrderDetail = () => {
                     matchedColorImg = match.images[0];
                   }
                 }
-                const itemImg = item.image || matchedColorImg || item.product?.image || (Array.isArray(item.product?.images) && item.product.images[0]) || '';
+                const itemImg = matchedColorImg || item.image || item.product?.image || (Array.isArray(item.product?.images) && item.product.images[0]) || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=900';
 
                 return (
-                  <div key={item.id || item._id || idx} className="py-4 flex items-center gap-4 first:pt-0 last:pb-0">
-                    <img
-                      src={itemImg}
-                      alt={itemName}
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=900';
-                      }}
-                      className="w-16 h-20 rounded-xl object-cover border border-[#E8E4DC] shrink-0 bg-[#FAF8F5]"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm text-[#1D241C]">
-                        {itemName}
-                      </div>
-                      <div className="text-xs text-[#687163] mt-0.5 flex flex-wrap items-center gap-2">
-                        {item.sku && <span className="font-mono">{item.sku}</span>}
-                        <span>•</span>
-                        <span className="inline-flex items-center gap-1.5">
-                          <span
-                            className="w-2.5 h-2.5 rounded-full border border-neutral-300 inline-block"
-                            style={{ backgroundColor: itemColorHex }}
-                          />
-                          <span>Color: <strong>{itemColor}</strong></span>
+                  <div
+                    key={item.id || item._id || `${order.id}-${idx}`}
+                    className="p-5 sm:p-6 flex flex-col sm:flex-row gap-5 items-start sm:items-center justify-between hover:bg-[#FAF8F5]/50 transition-colors"
+                  >
+                    {/* Item Image & Details */}
+                    <div className="flex gap-4 items-start sm:items-center">
+                      <img
+                        src={itemImg}
+                        alt={itemName}
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=900';
+                        }}
+                        className="w-20 h-26 object-cover rounded-xs bg-[#FAF8F5] border border-[#E8E4DC] shrink-0"
+                      />
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#C69E58]">
+                          {itemCategory}
                         </span>
-                        <span>•</span>
-                        <span>Size: <strong>{itemSize}</strong></span>
+                        <h3 className="font-serif text-base font-bold text-[#1D241C] leading-snug">
+                          {itemName}
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-[#687163] pt-0.5">
+                          {itemSku && (
+                            <>
+                              <span className="font-mono text-[11px] bg-[#FAF8F5] border border-[#E8E4DC] text-[#1D241C] px-1.5 py-0.5 rounded-xs font-semibold">
+                                SKU: {itemSku}
+                              </span>
+                              <span>•</span>
+                            </>
+                          )}
+                          <span>Size: <strong className="text-[#1D241C]">{itemSize}</strong></span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1.5">
+                            Color:
+                            <span
+                              className="w-2.5 h-2.5 rounded-full border border-neutral-300 inline-block"
+                              style={{ backgroundColor: itemColorHex }}
+                            />
+                            <strong className="text-[#1D241C]">{itemColor}</strong>
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right font-mono">
-                      <div className="text-xs text-[#687163]">
-                        {qty} x ₹{unitPrice.toFixed(2)}
+
+                    {/* Quantity & Price Breakdown */}
+                    <div className="flex items-center justify-between w-full sm:w-auto sm:justify-end gap-6 pt-3 sm:pt-0 border-t sm:border-t-0 border-[#E8E4DC]">
+                      {/* Quantity Pill */}
+                      <div className="flex items-center border border-[#E8E4DC] rounded-xs bg-[#FAF8F5] px-3 py-1.5">
+                        <span className="text-xs text-[#687163] mr-1.5 font-sans">Qty:</span>
+                        <span className="text-xs font-bold font-mono text-[#1D241C]">
+                          {qty}
+                        </span>
                       </div>
-                      <div className="font-bold text-sm text-[#1D241C] mt-0.5">
-                        ₹{itemTotal.toFixed(2)}
+
+                      <div className="text-right">
+                        <div className="text-xs text-[#687163] font-mono">
+                          ₹{unitPrice.toFixed(2)} each
+                        </div>
+                        <div className="font-mono text-base font-bold text-[#1D241C] mt-0.5">
+                          ₹{itemTotal.toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   </div>

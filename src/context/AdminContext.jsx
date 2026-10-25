@@ -126,16 +126,41 @@ export const AdminProvider = ({ children }) => {
                     customerName: o.shippingAddress?.fullName || o.user?.name || 'Customer',
                     customerEmail: o.user?.email || '',
                     shippingAddress: o.shippingAddress,
-                    items: (o.items || []).map((i) => ({
-                        ...i,
-                        id: i._id || i.product?._id || i.id,
-                        name: i.name,
-                        image: i.image || i.product?.images?.[0] || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=900',
-                        price: Number(i.price || 0),
-                        quantity: Number(i.quantity || 1),
-                        size: i.selectedSize || 'Standard',
-                        color: i.selectedColor?.name || 'Standard'
-                    })),
+                    items: (o.items || []).map((i, idx) => {
+                        const rawProd = i.product || {};
+                        const selectedColor = i.selectedColor || { name: i.color || 'Standard', hex: '#1D241C' };
+                        const colorName = (selectedColor.name || (typeof selectedColor === 'string' ? selectedColor : '')).trim().toLowerCase();
+                        
+                        // Check for color-specific image match in product.colorImages
+                        let matchedColorImage = '';
+                        if (colorName && Array.isArray(rawProd.colorImages) && rawProd.colorImages.length > 0) {
+                            const match = rawProd.colorImages.find(
+                                (ci) => ci.color && ci.color.trim().toLowerCase() === colorName
+                            );
+                            if (match && Array.isArray(match.images) && match.images.length > 0) {
+                                matchedColorImage = match.images[0];
+                            }
+                        }
+                        const itemImg = matchedColorImage || i.image || rawProd.image || (Array.isArray(rawProd.images) && rawProd.images[0]) || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=900';
+
+                        return {
+                            ...i,
+                            id: i._id || `${o._id || o.id}-${i.variantId || i.sku || idx}`,
+                            _id: i._id,
+                            variantId: i.variantId || '',
+                            sku: i.sku || rawProd.sku || '',
+                            name: i.name || rawProd.name || 'Garment Piece',
+                            image: itemImg,
+                            product: rawProd,
+                            category: rawProd.category?.name || rawProd.category || 'Luxury Haute',
+                            price: Number(i.price !== undefined ? i.price : (rawProd.price || 0)),
+                            quantity: Number(i.quantity || 1),
+                            size: i.selectedSize || i.size || 'Standard',
+                            selectedSize: i.selectedSize || i.size || 'Standard',
+                            color: selectedColor.name || selectedColor || 'Standard',
+                            selectedColor: typeof selectedColor === 'object' ? selectedColor : { name: selectedColor, hex: '#1D241C' }
+                        };
+                    }),
                     timeline: [
                         {
                             id: `tl-1`,
@@ -173,11 +198,42 @@ export const AdminProvider = ({ children }) => {
         }
     };
 
+    const fetchPromotions = async () => {
+        try {
+            const res = await api.get('/api/coupons');
+            if (res.data?.status && Array.isArray(res.data.data)) {
+                const formatted = res.data.data.map((p) => ({
+                    ...p,
+                    id: p._id || p.id,
+                    code: p.code,
+                    discountType: p.discountType,
+                    discountValue: p.discountValue,
+                    minSpend: p.minSpend,
+                    usageLimit: p.usageLimit,
+                    usageCount: p.usageCount || 0,
+                    startDate: p.startDate ? new Date(p.startDate).toISOString().split('T')[0] : '',
+                    endDate: p.endDate ? new Date(p.endDate).toISOString().split('T')[0] : '',
+                    isActive: p.isActive,
+                    isAllCategories: p.isAllCategories,
+                    applicableCategories: p.isAllCategories
+                        ? ['All Categories']
+                        : (p.applicableCategories?.map((c) => (typeof c === 'object' ? c.name : c)) || ['All Categories']),
+                    rawCategories: p.applicableCategories || [],
+                }));
+                setPromotions(formatted);
+                return formatted;
+            }
+        } catch (err) {
+            console.warn('Could not fetch live coupons:', err.message);
+        }
+    };
+
     useEffect(() => {
         localStorage.removeItem('sumilux_products');
         localStorage.removeItem('sumilux_orders');
         fetchOrders();
         fetchPayments();
+        fetchPromotions();
     }, []);
 
     useEffect(() => {
@@ -420,30 +476,66 @@ export const AdminProvider = ({ children }) => {
         showToast('success', 'Stock Adjusted', `${sku} balance updated by ${delta > 0 ? '+' : ''}${delta}`);
         logActivity('Inventory', 'Stock Adjustment', sku, `${delta > 0 ? '+' : ''}${delta} units (${reason})`);
     };
-    const addPromotion = (promoData) => {
-        const newPromo = {
-            ...promoData,
-            id: `prm-${Date.now().toString().slice(-4)}`,
-            usageCount: 0,
-            discountType: promoData.discountType || promoData.type || 'percentage',
-            discountValue: promoData.discountValue || promoData.value || 15,
-            isActive: promoData.isActive !== false,
-            startDate: promoData.startDate || new Date().toISOString().split('T')[0],
-            endDate: promoData.endDate || '2026-12-31',
-            applicableCategories: promoData.applicableCategories || [],
-        };
-        setPromotions((prev) => [newPromo, ...prev]);
-        showToast('success', 'Promotion Created', `Promo code "${newPromo.code}" is active.`);
-        logActivity('Promotions', 'Created Promo', newPromo.code, `Type: ${newPromo.discountType}, Value: ${newPromo.discountValue}`);
+    const addPromotion = async (promoData) => {
+        try {
+            const res = await api.post('/api/coupons', promoData);
+            if (res.data?.status && res.data.data) {
+                const created = res.data.data;
+                const newPromo = {
+                    ...created,
+                    id: created._id || created.id,
+                    applicableCategories: created.isAllCategories
+                        ? ['All Categories']
+                        : (created.applicableCategories?.map((c) => (typeof c === 'object' ? c.name : c)) || []),
+                    rawCategories: created.applicableCategories || [],
+                };
+                setPromotions((prev) => [newPromo, ...prev]);
+                showToast('success', 'Promotion Created', `Promo code "${newPromo.code}" is active.`);
+                logActivity('Promotions', 'Created Promo', newPromo.code, `Type: ${newPromo.discountType}, Value: ${newPromo.discountValue}`);
+                return newPromo;
+            }
+        } catch (err) {
+            console.error('Failed to create promotion:', err);
+            showToast('danger', 'Error', err.response?.data?.message || 'Failed to create coupon.');
+            throw err;
+        }
     };
-    const updatePromotion = (id, updates) => {
-        setPromotions((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
-        showToast('success', 'Promotion Saved', 'Code parameters updated.');
+
+    const updatePromotion = async (id, updates) => {
+        try {
+            const res = await api.put(`/api/coupons/${id}`, updates);
+            if (res.data?.status && res.data.data) {
+                const updated = res.data.data;
+                const formatted = {
+                    ...updated,
+                    id: updated._id || updated.id,
+                    applicableCategories: updated.isAllCategories
+                        ? ['All Categories']
+                        : (updated.applicableCategories?.map((c) => (typeof c === 'object' ? c.name : c)) || []),
+                    rawCategories: updated.applicableCategories || [],
+                };
+                setPromotions((prev) => prev.map((p) => (p.id === id || p._id === id ? formatted : p)));
+                showToast('success', 'Promotion Saved', 'Code parameters updated.');
+                return formatted;
+            }
+        } catch (err) {
+            console.error('Failed to update promotion:', err);
+            showToast('danger', 'Error', err.response?.data?.message || 'Failed to update coupon.');
+            throw err;
+        }
     };
-    const deletePromotion = (id) => {
-        const promo = promotions.find((p) => p.id === id);
-        setPromotions((prev) => prev.filter((p) => p.id !== id));
-        showToast('warning', 'Promotion Deleted', `Code ${promo?.code || id} deleted.`);
+
+    const deletePromotion = async (id) => {
+        try {
+            await api.delete(`/api/coupons/${id}`);
+            const promo = promotions.find((p) => p.id === id || p._id === id);
+            setPromotions((prev) => prev.filter((p) => p.id !== id && p._id !== id));
+            showToast('warning', 'Promotion Deleted', `Code ${promo?.code || id} deleted.`);
+        } catch (err) {
+            console.error('Failed to delete promotion:', err);
+            showToast('danger', 'Error', err.response?.data?.message || 'Failed to delete coupon.');
+            throw err;
+        }
     };
 
     const updateLook = (id, updates) => {

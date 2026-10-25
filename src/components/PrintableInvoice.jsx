@@ -109,15 +109,49 @@ export const PrintableInvoice = ({ order, onClose }) => {
                   const totalPrice = Number(item.totalPrice !== undefined ? item.totalPrice : (unitPrice * qty));
                   const itemName = item.name || item.productName || item.product?.name || 'Garment Piece';
                   const itemColor = item.color || (typeof item.selectedColor === 'object' ? item.selectedColor?.name : item.selectedColor) || 'Standard';
+                  const itemColorHex = typeof item.selectedColor === 'object' ? item.selectedColor?.hex : '#1D241C';
                   const itemSize = item.size || item.selectedSize || 'Standard';
+
+                  // Resolve exact color-variant image from product.colorImages or item.image
+                  const colorKey = (itemColor || '').trim().toLowerCase();
+                  let matchedColorImg = '';
+                  if (colorKey && Array.isArray(item.product?.colorImages) && item.product.colorImages.length > 0) {
+                    const match = item.product.colorImages.find((ci) => (ci.color || '').trim().toLowerCase() === colorKey);
+                    if (match && Array.isArray(match.images) && match.images.length > 0) {
+                      matchedColorImg = match.images[0];
+                    }
+                  }
+                  const itemImg = matchedColorImg || item.image || item.product?.image || (Array.isArray(item.product?.images) && item.product.images[0]) || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=900';
 
                   return (
                     <tr key={item.id || item._id || idx}>
                       <td className="py-4">
-                        <div className="font-medium text-[#1A1A1A]">{itemName}</div>
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={itemImg}
+                            alt={itemName}
+                            className="w-10 h-13 object-cover rounded-xs border border-[#E8E4DC] shrink-0"
+                            onError={(e) => {
+                              e.currentTarget.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=900';
+                            }}
+                          />
+                          <div>
+                            <div className="font-medium text-[#1A1A1A]">{itemName}</div>
+                            <div className="text-[10px] text-[#A68758] uppercase font-mono tracking-wider">
+                              {item.category || item.product?.category?.name || item.product?.category || 'Atelier Collection'}
+                            </div>
+                          </div>
+                        </div>
                       </td>
                       <td className="py-4 font-mono text-[#6B6864]">
-                        {item.sku || 'SMLX'} ({itemColor} / {itemSize})
+                        <div className="font-semibold text-[#1A1A1A]">{item.sku || 'SMLX'}</div>
+                        <div className="flex items-center gap-1.5 text-[11px] text-[#6B6864] mt-0.5">
+                          <span
+                            className="w-2 h-2 rounded-full border border-neutral-300 inline-block"
+                            style={{ backgroundColor: itemColorHex }}
+                          />
+                          <span>{itemColor} / {itemSize}</span>
+                        </div>
                       </td>
                       <td className="py-4 text-center font-mono-data">{qty}</td>
                       <td className="py-4 text-right font-mono-data">₹{unitPrice.toFixed(2)}</td>

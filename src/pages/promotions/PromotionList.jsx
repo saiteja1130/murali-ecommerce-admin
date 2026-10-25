@@ -117,14 +117,18 @@ export const PromotionList = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Valid Until:</span>
-                  <span className="font-mono text-[#1D241C]">{promo.endDate}</span>
+                  <span className="font-mono text-[#1D241C]">
+                    {promo.endDate ? (promo.endDate.includes('T') ? new Date(promo.endDate).toLocaleDateString('en-IN') : promo.endDate) : 'No expiry'}
+                  </span>
                 </div>
               </div>
             </div>
 
             <div className="mt-5 pt-3 border-t border-[#E8E4DC] flex items-center justify-between">
-              <span className="text-[11px] text-[#506040] font-medium">
-                {promo.applicableCategories.join(', ')}
+              <span className="text-[11px] text-[#506040] font-medium truncate max-w-[200px]" title={Array.isArray(promo.applicableCategories) ? promo.applicableCategories.join(', ') : 'All Categories'}>
+                {Array.isArray(promo.applicableCategories) && promo.applicableCategories.length > 0
+                  ? promo.applicableCategories.map((c) => (typeof c === 'object' ? c.name : c)).join(', ')
+                  : 'All Categories'}
               </span>
 
               <div className="flex items-center gap-2">
