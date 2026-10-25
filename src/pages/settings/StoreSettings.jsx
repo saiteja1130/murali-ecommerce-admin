@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAdmin } from '../../context/AdminContext';
 import api from '../../context/api';
 import { Truck, Save, Tag, Sparkles, Loader2, Banknote } from 'lucide-react';
@@ -295,10 +296,35 @@ export const StoreSettings = () => {
       {/* Tab Contents: Promotions & Coupons */}
       {activeTab === 'promotions' && (
         <div className="space-y-6">
+          {/* Category-Specific & Multi-Coupon Manager Banner */}
+          <div className="bg-gradient-to-r from-[#FAF8F5] to-white border border-[#C69E58]/40 rounded-2xl p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-[#C69E58]" />
+                <h3 className="font-serif text-lg font-bold text-[#1D241C]">
+                  Category-Specific & Multi-Coupon Manager
+                </h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-[#506040]/15 text-[#506040]">
+                  New
+                </span>
+              </div>
+              <p className="text-xs text-[#687163] mt-1 max-w-xl leading-relaxed">
+                Want to apply coupon codes based on specific categories (e.g. <strong>Sarees</strong>, <strong>Dresses</strong>, <strong>Jewelry</strong>)? Create targeted promotional codes with category selection rules, minimum purchase values, and usage caps.
+              </p>
+            </div>
+
+            <Link
+              to="/admin/promotions"
+              className="px-5 py-2.5 bg-[#1D241C] hover:bg-[#C69E58] text-white hover:text-[#1D241C] text-xs font-semibold rounded-xl transition-colors shrink-0 flex items-center gap-2 shadow-sm cursor-pointer"
+            >
+              <span>Manage Category Coupons →</span>
+            </Link>
+          </div>
+
           <div className="bg-white rounded-2xl border border-[#E8E4DC] p-6 shadow-2xs space-y-6">
             <div>
               <h2 className="font-serif text-xl font-bold text-[#1D241C]">
-                Promotional Coupon Configuration
+                Global Fallback Coupon Configuration
               </h2>
               <p className="text-xs text-[#687163] mt-1">
                 Configure your active promotional voucher code and discount percentage redeemed during checkout.

@@ -36,6 +36,10 @@ import HeroCarouselEditor from './pages/content/HeroCarouselEditor';
 // Store Settings Module
 import StoreSettings from './pages/settings/StoreSettings';
 
+// Promotions & Coupon Codes Module
+import PromotionList from './pages/promotions/PromotionList';
+import PromotionForm from './pages/promotions/PromotionForm';
+
 export function App() {
   return (
     <RootProvider>
@@ -83,7 +87,12 @@ export function App() {
             <Route path="hero-carousel" element={<HeroCarouselEditor />} />
             <Route path="content/hero" element={<HeroCarouselEditor />} />
 
-            {/* 6. Store Settings */}
+            {/* 6. Promotions & Category Coupons */}
+            <Route path="promotions" element={<PromotionList />} />
+            <Route path="promotions/new" element={<PromotionForm mode="create" />} />
+            <Route path="promotions/:id/edit" element={<PromotionForm mode="edit" />} />
+
+            {/* 7. Store Settings */}
             <Route path="settings" element={<StoreSettings />} />
             <Route path="settings/store" element={<StoreSettings />} />
           </Route>

@@ -13,7 +13,8 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Crown,
-  Settings
+  Settings,
+  Tag
 } from 'lucide-react';
 
 export const Sidebar = () => {
@@ -60,8 +61,13 @@ export const Sidebar = () => {
       ]
     },
     {
-      title: 'WEBSITE BANNERS',
+      title: 'MARKETING & PROMOTIONS',
       items: [
+        {
+          name: 'Coupons & Discounts',
+          path: '/admin/promotions',
+          icon: Tag
+        },
         {
           name: 'Hero Carousel',
           path: '/admin/hero-carousel',
